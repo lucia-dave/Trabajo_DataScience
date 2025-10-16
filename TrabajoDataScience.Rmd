@@ -9,3 +9,11 @@ output:
 ---
 
 # INTRODUCCIÓN
+
+#OBTENCIÓN Y EXPLICACIÓN DEL SET DE DATOS
+
+
+```{r}
+data <- read.csv('./data/cardio_train.csv', header = T, sep = ';', stringsAsFactors = F)
+```
+
