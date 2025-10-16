@@ -11,9 +11,24 @@ output:
 # INTRODUCCIÓN
 
 #OBTENCIÓN Y EXPLICACIÓN DEL SET DE DATOS
+Los datos han sido adquiridos de la plataforma Kaggle. Hay un total de 3390 personas a las cuales se les ha realizado una serie de preguntas y mediciones (variables). 
 
+
+#-------------------------RESUMIR LO DE AQUI ABAJO---------------------------------------
+This Dataset is for HME Workshop in Oct 3, 2020
+Introduction
+World Health Organization has estimated 12 million deaths occur worldwide, every year due to Heart diseases. Half the deaths in the United States and other developed countries are due to cardio vascular diseases. The early prognosis of cardiovascular diseases can aid in making decisions on lifestyle changes in high risk patients and in turn reduce the complications. This research intends to pinpoint the most relevant/risk factors of heart disease as well as predict the overall risk using logistic regression
+Data Preparation
+
+Task
+The task is to predict whether patient have 10 year risk of coronary heart disease CHD or not. Additionally, participants also asked to create some data visualization about the data to gained actionable insight about the topic.
+
+Source
+The dataset is publically available on the Kaggle website, and it is from an ongoing cardiovascular study on residents of the town of Framingham, Massachusetts. The classification goal is to predict whether the patient has 10-year risk of future coronary heart disease (CHD).The dataset provides the patients’ information. It includes over 4,000 records and 15 attributes.
+Variables
+Each attribute is a potential risk factor. There are both demographic, behavioral and medical risk factors.
 
 ```{r}
-data <- read.csv('./data/cardio_train.csv', header = T, sep = ';', stringsAsFactors = F)
+data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F)
 ```
 
