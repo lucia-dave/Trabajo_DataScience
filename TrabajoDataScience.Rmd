@@ -24,7 +24,7 @@ El análisis se centrará en explorar la distribución de las variables, estudia
 
 ## METODOLOGÍA
 
-El análisis de los datos se centrará en explorar la información disponible y obtener estadísticas descriptivas y combinadas que permitan identificar patrones y relaciones entre variables. Se comenzará con la **importación de los datos** y su **preparación**, realizando limpieza de valores faltantes, corrección de posibles errores y normalización de las variables cuando sea necesario.
+Se buscará obtener estadísticas descriptivas y combinadas que permitan identificar patrones y relaciones entre las variables. Se comenzará con la **importación de los datos** y su **preparación**, realizando limpieza de valores faltantes, corrección de posibles errores y normalización de las variables cuando sea necesario.
 
 A continuación, se realizará una **exploración estadística y visual** para comprender la distribución de las variables, su dispersión y posibles asociaciones. Esto vendrá acompañado de una gran variedad de gráficos para entender mejor el comportamiento de los datos.
 
@@ -111,5 +111,66 @@ data[data==''] <- NA #reemplazamos las celdas vacías por NA
 data <- na.omit(data) #eliminamos todos los pacientes que incluyan valores de tipo NA
 dim(data) #comprobamos que el numero de filas se ha visto reducido, en este caso a 2927 pacientes
 ```
-## 3. Visualización descriptiva de variables  
+Comprobamos la clase de datos de cada columna para saber cómo tratarlos
+```{r}
+str(data)
+```
+Observamos que en la columna 'education', los valores son:
+
+- 1:
+- 2:
+- 3: 
+- 4:
+
+Factorizamos y cambiamos el nombre de los valores de 'education' para aportarles más sentido
+```{r}
+data$education <- factor(data$education,
+                         levels=c(1,2,3,4),
+                         labels=c("Basico", "Medio", "Tecnico", "Universitario")
+)
+class(data$education) #Comprobamos que ahora la columa education es de tipo factor
+```
+
+## 3. Visualización descriptiva de variables 
+Se llevará a cabo un análisis visual preliminar para comprender mejor el comportamiento de las variables y observar posibles relaciones o diferencias antes de proceder con los análisis estadísticos.
+
+Comenzamos realizando varios histogramas con sus densidades de variables de carácter contínuo:
+```{r}
+#Variables continuas a analizar:
+vars_cont <- c("age", "BMI", "totChol", "glucose", "sysBP", "diaBP", "heartRate")
+
+cardio_long <- data %>% #Convertimos a formato largo para poder representar mejor los datos
+  select(all_of(vars_cont)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor")
+
+#Generamos un histograma que muestre la distribución de cada variable analizada
+ggplot(cardio_long, aes(x = valor, fill = variable)) +
+  geom_histogram(aes(y = ..density..), bins = 30, alpha = 0.6, color = "black") +
+  geom_density(alpha = 0.2) +
+  facet_wrap(~variable, scales = "free", ncol = 3) + #Separamos individualmente
+  theme_minimal() +
+  labs(title = "Distribución de variables continuas del dataset",
+       x = "Valor", y = "Densidad") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+CONCLUSIONES:
+
+Edad: podemos observar que la mayoría de las personas están entre los 40-60 años, dato que se puede confirmar en su respectiva gráfica. Hay, por lo tanto, un predominio de gente adulta de mediana edad.
+
+BMI: en la campana de Gauss se aprecia una forma aproximadamente normal centrada en 25-30, lo cual corresponde a un perso normal o sobrepeso leve.
+
+Presión diastólica (diaBP): sigue una distribución bastante simétrica, centrada cerca de 80-85 mmHg. Corresponde a un valor normal. #PLUS: ANALIZAR CON BOXPLOT CASOS POR ENCIMA DE 100 (HIPERTENSION)
+
+Glucosa: distribución altamente asimétrica a la derecha, con sesgo positivo. La mayoría de valores se encuentra entre los 80-100 mg/dL. #PLUS: ANALIZAR CON BOXPLOT COLA LARGA DE VALORES ALTOS >150-200 (HIPERGLUCEMIA/DIABETES)
+
+Frecuencia cardíaca (heartRate): valores centrados en torno a los 70-80 latidos por minuto, con una ligera cola hacia la derecha. Patrón típico en adultos sanos. #PLUS: ANALIZAR CON BOXPLOT >100 TAQUICARDIA
+
+Presión sistólica (sysBP): distribución asimétrica hacia la derecha, con la mayoría entre los 120-150 mmHg. Los valores llegan hasta aproximadamente los 250 mmHg. #PLUS: ANALIZAR CON BOXPLOT PRESION ARTERIAL ELEVADA (HIPERTENSION SISTOLICA)
+
+Colesterol total (totChol): dsitribución con forma de campana, centrada en torno a los 220 mg/dL, con una cola a la derecha. Indica que muchas personas tienen un colesterol ligeramente alto, ya que el valor normal de colesterol es de <200 mg/dL. #PLUS: ANALIZAR CON BOXPLOT CASOS EXTREMOS >300 HIPERCOLESTEROLEMIA
+
+```{r}
+mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
+mediaEdad
+```
 
