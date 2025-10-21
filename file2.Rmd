@@ -99,4 +99,4 @@ data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F
 ```
 
 
-
+##2. Limpieza de datos
