@@ -1,5 +1,5 @@
 ---
-title: "Trabajo Data Science"
+title: "TRABAJO DATA SCIENCE"
 author: 
   - "Lucía Dávalos, María Cañal"
 subtitle: "ANÁLISIS ESTADÍSTICO PARA LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES"
@@ -169,6 +169,73 @@ ggplot(cardio_long, aes(x = valor, fill = variable)) +
 **Presión sistólica (sysBP)**: distribución asimétrica hacia la derecha, con la mayoría entre los 120-150 mmHg. Los valores llegan hasta aproximadamente los 250 mmHg. #PLUS: ANALIZAR CON BOXPLOT PRESION ARTERIAL ELEVADA (HIPERTENSION SISTOLICA)
 
 **Colesterol total (totChol)**: dsitribución con forma de campana, centrada en torno a los 220 mg/dL, con una cola a la derecha. Indica que muchas personas tienen un colesterol ligeramente alto, ya que el valor normal de colesterol es de <200 mg/dL. #PLUS: ANALIZAR CON BOXPLOT CASOS EXTREMOS >300 HIPERCOLESTEROLEMIA
+
+
+A continuación, realizamos varios gráficos de barras de variables de **carácter categóricas**:
+
+```{r}
+
+
+# Crear cada gráfico por separado
+sex_barras <- ggplot(data, aes(x = factor(sex))) +
+  geom_bar(fill = "steelblue") +
+  scale_x_discrete(labels = c("Mujer", "Hombre")) +
+  labs(title = "Distribución por Sexo", x = "Sexo", y = "Frecuencia") +
+  theme_minimal()
+
+is_smoking_barras <- ggplot(data, aes(x = factor(is_smoking))) +
+  geom_bar(fill = "salmon") +
+  scale_x_discrete(labels = c("NO", "YES")) +
+  labs(title = "Fumadores", x = "Fumador", y = "Frecuencia") +
+  theme_minimal()
+
+BPMeds_barras <- ggplot(data, aes(x = factor(BPMeds))) +
+  geom_bar(fill = "lightgreen") +
+  scale_x_discrete(labels = c("0", "1")) +
+  labs(title = "Toma medicación para presión arterial", x = "BPMeds", y = "Frecuencia") +
+  theme_minimal()
+
+education_barras <- ggplot(data, aes(x = factor(education))) +
+  geom_bar(fill = "orange") +
+  scale_x_discrete(labels = c("Primaria", "Secundaria", "Bachillerato", "Universidad")) +
+  labs(title = "Nivel educativo", x = "Educación", y = "Frecuencia") +
+  theme_minimal()
+
+sex_barras
+is_smoking_barras
+BPMeds_barras
+education_barras
+
+
+```
+
+Queremos representar las proporciones dentro de cada variable:
+
+```{r}
+
+#TENEMOS QUE CAMBIAR ESTO 
+
+sex_proporciones <- ggplot(data, aes(x = factor(sex), fill = factor(sex))) + 
+  geom_bar(position = "fill") +  # "fill" convierte a proporciones
+  theme_classic() +
+  scale_fill_manual(values = c("pink", "lightblue")) +
+  scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0.01,0.02))) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(colour = "black", size = 1)) +
+  ggtitle("Proporciones por Sexo")
+
+sex_proporciones
+
+
+
+```
+
+
 
 ```{r}
 mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
