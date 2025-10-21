@@ -75,6 +75,27 @@ El conjunto de datos contiene información de 3.390 personas y un total de 15 va
 Este conjunto de variables permitirá realizar un análisis completo de los factores que pueden influir en la salud cardiovascular, combinando información médica y hábitos de vida. El estudio se centrará en examinar las relaciones entre estas variables y en detectar patrones o asociaciones que aporten información sobre el riesgo de enfermedad cardíaca en la población analizada.
 
 
+#VOLUMEN 1: Análisis exploratorio y estadístico
+##1. Importar librerías y datos
+```{r libraries,warning=FALSE,message=FALSE}
+library(ggplot2)
+library(viridis)
+library(ggrepel)
+library(dplyr)
+library(tm)
+library(textstem)
+library(nycflights13)
+library(pwr)
+library(tidyr)
+library(stringr)
+library(tidyverse)
+library(purrr)
+library(tibble)
+library(jsonlite)
+library(data.table)
+```
+
+
 ```{r}
 data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F)
 ```
