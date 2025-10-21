@@ -350,8 +350,8 @@ display: none;
 
 
 <h1 class="title toc-ignore">Trabajo Data Science</h1>
-<h3 class="subtitle">ANÁLISIS DE VISUALIZACIÓN Y MACHINE LEARNING PARA
-LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES</h3>
+<h3 class="subtitle">ANÁLISIS ESTADÍSTICO PARA LA PREDICCIÓN DE
+ENFERMEDADES CARDIOVASCULARES</h3>
 <h4 class="author">Lucía Dávalos, María Cañal</h4>
 
 </div>
@@ -486,6 +486,23 @@ información médica y hábitos de vida. El estudio se centrará en examinar
 las relaciones entre estas variables y en detectar patrones o
 asociaciones que aporten información sobre el riesgo de enfermedad
 cardíaca en la población analizada.</p>
+<p>#VOLUMEN 1: Análisis exploratorio y estadístico ##1. Importar
+librerías y datos</p>
+<pre class="r"><code>library(ggplot2)
+library(viridis)
+library(ggrepel)
+library(dplyr)
+library(tm)
+library(textstem)
+library(nycflights13)
+library(pwr)
+library(tidyr)
+library(stringr)
+library(tidyverse)
+library(purrr)
+library(tibble)
+library(jsonlite)
+library(data.table)</code></pre>
 <pre class="r"><code>data &lt;- read.csv(&#39;./data/train.csv&#39;, header = T, sep = &#39;,&#39;, stringsAsFactors = F)</code></pre>
 </div>
 
