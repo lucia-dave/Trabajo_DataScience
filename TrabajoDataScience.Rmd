@@ -153,21 +153,22 @@ ggplot(cardio_long, aes(x = valor, fill = variable)) +
        x = "Valor", y = "Densidad") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
-CONCLUSIONES:
 
-Edad: podemos observar que la mayoría de las personas están entre los 40-60 años, dato que se puede confirmar en su respectiva gráfica. Hay, por lo tanto, un predominio de gente adulta de mediana edad.
+### CONCLUSIONES:
 
-BMI: en la campana de Gauss se aprecia una forma aproximadamente normal centrada en 25-30, lo cual corresponde a un perso normal o sobrepeso leve.
+**Edad**: podemos observar que la mayoría de las personas están entre los 40-60 años, dato que se puede confirmar en su respectiva gráfica. Hay, por lo tanto, un predominio de gente adulta de mediana edad.
 
-Presión diastólica (diaBP): sigue una distribución bastante simétrica, centrada cerca de 80-85 mmHg. Corresponde a un valor normal. #PLUS: ANALIZAR CON BOXPLOT CASOS POR ENCIMA DE 100 (HIPERTENSION)
+**BMI**: en la campana de Gauss se aprecia una forma aproximadamente normal centrada en 25-30, lo cual corresponde a un perso normal o sobrepeso leve.
 
-Glucosa: distribución altamente asimétrica a la derecha, con sesgo positivo. La mayoría de valores se encuentra entre los 80-100 mg/dL. #PLUS: ANALIZAR CON BOXPLOT COLA LARGA DE VALORES ALTOS >150-200 (HIPERGLUCEMIA/DIABETES)
+**Presión diastólica (diaBP)**: sigue una distribución bastante simétrica, centrada cerca de 80-85 mmHg. Corresponde a un valor normal. #PLUS: ANALIZAR CON BOXPLOT CASOS POR ENCIMA DE 100 (HIPERTENSION)
 
-Frecuencia cardíaca (heartRate): valores centrados en torno a los 70-80 latidos por minuto, con una ligera cola hacia la derecha. Patrón típico en adultos sanos. #PLUS: ANALIZAR CON BOXPLOT >100 TAQUICARDIA
+**Glucosa**: distribución altamente asimétrica a la derecha, con sesgo positivo. La mayoría de valores se encuentra entre los 80-100 mg/dL. #PLUS: ANALIZAR CON BOXPLOT COLA LARGA DE VALORES ALTOS >150-200 (HIPERGLUCEMIA/DIABETES)
 
-Presión sistólica (sysBP): distribución asimétrica hacia la derecha, con la mayoría entre los 120-150 mmHg. Los valores llegan hasta aproximadamente los 250 mmHg. #PLUS: ANALIZAR CON BOXPLOT PRESION ARTERIAL ELEVADA (HIPERTENSION SISTOLICA)
+**Frecuencia cardíaca (heartRate)**: valores centrados en torno a los 70-80 latidos por minuto, con una ligera cola hacia la derecha. Patrón típico en adultos sanos. #PLUS: ANALIZAR CON BOXPLOT >100 TAQUICARDIA
 
-Colesterol total (totChol): dsitribución con forma de campana, centrada en torno a los 220 mg/dL, con una cola a la derecha. Indica que muchas personas tienen un colesterol ligeramente alto, ya que el valor normal de colesterol es de <200 mg/dL. #PLUS: ANALIZAR CON BOXPLOT CASOS EXTREMOS >300 HIPERCOLESTEROLEMIA
+**Presión sistólica (sysBP)**: distribución asimétrica hacia la derecha, con la mayoría entre los 120-150 mmHg. Los valores llegan hasta aproximadamente los 250 mmHg. #PLUS: ANALIZAR CON BOXPLOT PRESION ARTERIAL ELEVADA (HIPERTENSION SISTOLICA)
+
+**Colesterol total (totChol)**: dsitribución con forma de campana, centrada en torno a los 220 mg/dL, con una cola a la derecha. Indica que muchas personas tienen un colesterol ligeramente alto, ya que el valor normal de colesterol es de <200 mg/dL. #PLUS: ANALIZAR CON BOXPLOT CASOS EXTREMOS >300 HIPERCOLESTEROLEMIA
 
 ```{r}
 mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
