@@ -1,5 +1,5 @@
 ---
-title: "Trabajo Data Science"
+title: "TRABAJO DATA SCIENCE"
 author: 
   - "Lucía Dávalos, María Cañal"
 subtitle: "ANÁLISIS ESTADÍSTICO PARA LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES"
