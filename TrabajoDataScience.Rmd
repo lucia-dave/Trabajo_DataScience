@@ -95,8 +95,21 @@ library(jsonlite)
 library(data.table)
 ```
 
-
+Adquirimos los datos del csv:
 ```{r}
-data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F)
+data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F) #Este será nuestro archivo de datos
+
+head(data) #Mostramos las seis primeras filas de datos para conocer mejor la estructura
 ```
+
+## 2. Limpieza y preparación de datos  
+Para poder realizar cálculos con nuestros datos, comprobaremos si existe algún id duplicado y eliminaremos también los pacientes que tengan algún valor nulo o de tipo 'NA'.
+```{r}
+data <- unique(data) #Para que no haya datos duplicados
+
+data[data==''] <- NA #reemplazamos las celdas vacías por NA
+data <- na.omit(data) #eliminamos todos los pacientes que incluyan valores de tipo NA
+dim(data) #comprobamos que el numero de filas se ha visto reducido, en este caso a 2927 pacientes
+```
+## 3. Visualización descriptiva de variables  
 
