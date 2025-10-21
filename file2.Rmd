@@ -1,0 +1,102 @@
+---
+title: "File2"
+output: html_document
+date: "2025-10-21"
+---
+
+## INTRODUCCIÓN
+
+Las enfermedades cardiovasculares representan una de las principales causas de mortalidad a nivel mundial. Según la Organización Mundial de la Salud (OMS), más de 12 millones de personas fallecen cada año a causa de patologías del corazón. Comprender los factores de riesgo asociados a este tipo de enfermedades es fundamental para mejorar la prevención y la salud pública.
+
+El objetivo de este proyecto es realizar un análisis estadístico y exploratorio de distintos factores relacionados con la salud cardiovascular. Se pretende observar cómo una serie de variables pueden estar asociadas al riesgo de desarrollar una enfermedad coronaria a diez años. Para ello, se buscará identificar patrones relevantes, correlaciones significativas y posibles diferencias entre grupos de la población.
+
+## OBTENCIÓN Y EXPLICACIÓN DEL SET DE DATOS
+
+El conjunto de datos utilizado procede de la plataforma **Kaggle** y está basado en el reconocido **Framingham Heart Study**, un estudio realizado en la ciudad de Framingham, Massachusetts (EE. UU.).
+
+El dataset incluye información de **3.390 individuos**, con variables que abarcan aspectos **demográficos, de comportamiento y médicos**, tales como edad, sexo, nivel de colesterol, presión arterial, hábito tabáquico, diabetes, índice de masa corporal o frecuencia cardíaca, entre otros. La variable `TenYearCHD` indica si un individuo presenta o no riesgo de sufrir una enfermedad coronaria en los próximos diez años.
+
+El análisis se centrará en explorar la distribución de las variables, estudiar sus relaciones y contrastar hipótesis sobre posibles diferencias entre grupos, aplicando técnicas como la estadística inferencial, análisis de correlaciones, regresión lineal, análisis de componentes principales (PCA) y visualización de datos. La idea es lograr comprender la estructura del conjunto de datos y extraer conclusiones estadísticas sobre los factores de riesgo asociados a la salud cardiovascular.
+
+## METODOLOGÍA
+
+El análisis de los datos se centrará en explorar la información disponible y obtener estadísticas descriptivas y combinadas que permitan identificar patrones y relaciones entre variables. Se comenzará con la **importación de los datos** y su **preparación**, realizando limpieza de valores faltantes, corrección de posibles errores y normalización de las variables cuando sea necesario.
+
+A continuación, se realizará una **exploración estadística y visual** para comprender la distribución de las variables, su dispersión y posibles asociaciones. Esto vendrá acompañado de una gran variedad de gráficos para entender mejor el comportamiento de los datos.
+
+Se aplicarán también **técnicas de contraste de hipótesis** y pruebas estadísticas para identificar diferencias significativas entre grupos, por ejemplo, comparando hombres y mujeres, fumadores y no fumadores, o distintos rangos de edad. Además, se llevará a cabo un **Análisis de Componentes Principales (PCA)** para estudiar patrones globales y posibles agrupamientos dentro del conjunto de datos.
+
+El trabajo se organizará en dos volúmenes principales:
+
+**VOLUMEN 1: Análisis Exploratorio y Estadístico**  
+1. Importar librerías y datos  
+2. Limpieza y preparación de datos  
+3. Visualización descriptiva de variables  
+4. Análisis de correlaciones  
+5. Contraste de hipótesis para identificar diferencias significativas  
+6. Análisis de Componentes Principales (PCA)  
+   - Varianza explicada  
+   - Componentes principales  
+
+**VOLUMEN 2: Análisis Multivariante y Combinación de Variables**  
+1. Creación de tablas combinadas y resúmenes estadísticos por grupos  
+2. Análisis de relaciones entre variables cualitativas y cuantitativas  
+3. Visualización de patrones y agrupamientos detectados  
+4. Interpretación de resultados y conclusiones estadísticas
+
+El propósito de esta metodología es obtener una comprensión completa de los factores de riesgo cardiovascular, explorando cómo se relacionan las distintas variables entre sí y detectando patrones que puedan ser relevantes para la investigación epidemiológica y la salud pública.
+
+
+## DATOS
+
+El conjunto de datos contiene información de 3.390 personas y un total de 15 variables. Cada una de ellas representa un posible factor de riesgo cardiovascular. A continuación, se describen brevemente las principales variables incluidas:
+
+**sex:** variable binaria que indica el sexo del individuo (1 = hombre, 0 = mujer).  
+**age:** edad del participante en años.  
+**education:** nivel educativo alcanzado.  
+**currentSmoker:** indica si el individuo fuma actualmente (1 = sí, 0 = no).  
+**cigsPerDay:** número medio de cigarrillos fumados por día.  
+**BPMeds:** indica si la persona toma medicación para la presión arterial.  
+**prevalentStroke:** indica si el participante ha sufrido un ictus previo.  
+**prevalentHyp:** indica si el participante presenta hipertensión diagnosticada.  
+**diabetes:** indica si el participante padece diabetes.  
+**totChol:** nivel total de colesterol en mg/dL.  
+**sysBP:** presión arterial sistólica.  
+**diaBP:** presión arterial diastólica.  
+**BMI:** índice de masa corporal.  
+**heartRate:** frecuencia cardíaca en reposo.  
+**glucose:** nivel de glucosa en sangre.  
+**TenYearCHD:** variable objetivo que indica si el participante desarrollará o no enfermedad coronaria en los próximos 10 años (1 = sí, 0 = no).
+
+Este conjunto de variables permitirá realizar un análisis completo de los factores que pueden influir en la salud cardiovascular, combinando información médica y hábitos de vida. El estudio se centrará en examinar las relaciones entre estas variables y en detectar patrones o asociaciones que aporten información sobre el riesgo de enfermedad cardíaca en la población analizada.
+
+
+#VOLUMEN 1: Análisis exploratorio y estadístico
+##1. Importar librerías y datos
+
+
+```{r libraries,warning=FALSE,message=FALSE}
+library(ggplot2)
+library(viridis)
+library(ggrepel)
+library(dplyr)
+library(tm)
+library(textstem)
+library(nycflights13)
+library(pwr)
+library(tidyr)
+library(stringr)
+library(tidyverse)
+library(purrr)
+library(tibble)
+library(jsonlite)
+library(data.table)
+```
+
+
+```{r}
+data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F)
+```
+
+
+
