@@ -350,8 +350,8 @@ display: none;
 
 
 <h1 class="title toc-ignore">Trabajo Data Science</h1>
-<h3 class="subtitle">ANÁLISIS DE VISUALIZACIÓN Y MACHINE LEARNING PARA
-LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES</h3>
+<h3 class="subtitle">ANÁLISIS ESTADÍSTICO PARA LA PREDICCIÓN DE
+ENFERMEDADES CARDIOVASCULARES</h3>
 <h4 class="author">Lucía Dávalos, María Cañal</h4>
 
 </div>
@@ -363,6 +363,12 @@ LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES</h3>
 EXPLICACIÓN DEL SET DE DATOS</a></li>
 <li><a href="#metodolog%C3%ADa" id="toc-metodología">METODOLOGÍA</a></li>
 <li><a href="#datos" id="toc-datos">DATOS</a></li>
+<li><a href="#volumen-1-an%C3%A1lisis-exploratorio-y-estad%C3%ADstico" id="toc-volumen-1-análisis-exploratorio-y-estadístico">VOLUMEN 1:
+Análisis exploratorio y estadístico</a>
+<ul>
+<li><a href="#importar-librer%C3%ADas-y-datos" id="toc-importar-librerías-y-datos">1. Importar librerías y
+datos</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -486,7 +492,28 @@ información médica y hábitos de vida. El estudio se centrará en examinar
 las relaciones entre estas variables y en detectar patrones o
 asociaciones que aporten información sobre el riesgo de enfermedad
 cardíaca en la población analizada.</p>
+</div>
+<div id="volumen-1-análisis-exploratorio-y-estadístico" class="section level1">
+<h1>VOLUMEN 1: Análisis exploratorio y estadístico</h1>
+<div id="importar-librerías-y-datos" class="section level2">
+<h2>1. Importar librerías y datos</h2>
+<pre class="r"><code>library(ggplot2)
+library(viridis)
+library(ggrepel)
+library(dplyr)
+library(tm)
+library(textstem)
+library(nycflights13)
+library(pwr)
+library(tidyr)
+library(stringr)
+library(tidyverse)
+library(purrr)
+library(tibble)
+library(jsonlite)
+library(data.table)</code></pre>
 <pre class="r"><code>data &lt;- read.csv(&#39;./data/train.csv&#39;, header = T, sep = &#39;,&#39;, stringsAsFactors = F)</code></pre>
+</div>
 </div>
 
 
