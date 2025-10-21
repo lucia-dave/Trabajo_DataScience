@@ -359,11 +359,134 @@ LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES</h3>
 <div id="TOC">
 <ul>
 <li><a href="#introducci%C3%B3n" id="toc-introducción">INTRODUCCIÓN</a></li>
+<li><a href="#obtenci%C3%B3n-y-explicaci%C3%B3n-del-set-de-datos" id="toc-obtención-y-explicación-del-set-de-datos">OBTENCIÓN Y
+EXPLICACIÓN DEL SET DE DATOS</a></li>
+<li><a href="#metodolog%C3%ADa" id="toc-metodología">METODOLOGÍA</a></li>
+<li><a href="#datos" id="toc-datos">DATOS</a></li>
 </ul>
 </div>
 
-<div id="introducción" class="section level1">
-<h1>INTRODUCCIÓN</h1>
+<div id="introducción" class="section level2">
+<h2>INTRODUCCIÓN</h2>
+<p>Las enfermedades cardiovasculares representan una de las principales
+causas de mortalidad a nivel mundial. Según la Organización Mundial de
+la Salud (OMS), más de 12 millones de personas fallecen cada año a causa
+de patologías del corazón. Comprender los factores de riesgo asociados a
+este tipo de enfermedades es fundamental para mejorar la prevención y la
+salud pública.</p>
+<p>El objetivo de este proyecto es realizar un análisis estadístico y
+exploratorio de distintos factores relacionados con la salud
+cardiovascular. Se pretende observar cómo una serie de variables pueden
+estar asociadas al riesgo de desarrollar una enfermedad coronaria a diez
+años. Para ello, se buscará identificar patrones relevantes,
+correlaciones significativas y posibles diferencias entre grupos de la
+población.</p>
+</div>
+<div id="obtención-y-explicación-del-set-de-datos" class="section level2">
+<h2>OBTENCIÓN Y EXPLICACIÓN DEL SET DE DATOS</h2>
+<p>El conjunto de datos utilizado procede de la plataforma
+<strong>Kaggle</strong> y está basado en el reconocido
+<strong>Framingham Heart Study</strong>, un estudio realizado en la
+ciudad de Framingham, Massachusetts (EE. UU.).</p>
+<p>El dataset incluye información de <strong>3.390 individuos</strong>,
+con variables que abarcan aspectos <strong>demográficos, de
+comportamiento y médicos</strong>, tales como edad, sexo, nivel de
+colesterol, presión arterial, hábito tabáquico, diabetes, índice de masa
+corporal o frecuencia cardíaca, entre otros. La variable
+<code>TenYearCHD</code> indica si un individuo presenta o no riesgo de
+sufrir una enfermedad coronaria en los próximos diez años.</p>
+<p>El análisis se centrará en explorar la distribución de las variables,
+estudiar sus relaciones y contrastar hipótesis sobre posibles
+diferencias entre grupos, aplicando técnicas como la estadística
+inferencial, análisis de correlaciones, regresión lineal, análisis de
+componentes principales (PCA) y visualización de datos. La idea es
+lograr comprender la estructura del conjunto de datos y extraer
+conclusiones estadísticas sobre los factores de riesgo asociados a la
+salud cardiovascular.</p>
+</div>
+<div id="metodología" class="section level2">
+<h2>METODOLOGÍA</h2>
+<p>El análisis de los datos se centrará en explorar la información
+disponible y obtener estadísticas descriptivas y combinadas que permitan
+identificar patrones y relaciones entre variables. Se comenzará con la
+<strong>importación de los datos</strong> y su
+<strong>preparación</strong>, realizando limpieza de valores faltantes,
+corrección de posibles errores y normalización de las variables cuando
+sea necesario.</p>
+<p>A continuación, se realizará una <strong>exploración estadística y
+visual</strong> para comprender la distribución de las variables, su
+dispersión y posibles asociaciones. Esto vendrá acompañado de una gran
+variedad de gráficos para entender mejor el comportamiento de los
+datos.</p>
+<p>Se aplicarán también <strong>técnicas de contraste de
+hipótesis</strong> y pruebas estadísticas para identificar diferencias
+significativas entre grupos, por ejemplo, comparando hombres y mujeres,
+fumadores y no fumadores, o distintos rangos de edad. Además, se llevará
+a cabo un <strong>Análisis de Componentes Principales (PCA)</strong>
+para estudiar patrones globales y posibles agrupamientos dentro del
+conjunto de datos.</p>
+<p>El trabajo se organizará en dos volúmenes principales:</p>
+<p><strong>VOLUMEN 1: Análisis Exploratorio y Estadístico</strong><br />
+1. Importar librerías y datos<br />
+2. Limpieza y preparación de datos<br />
+3. Visualización descriptiva de variables<br />
+4. Análisis de correlaciones<br />
+5. Contraste de hipótesis para identificar diferencias
+significativas<br />
+6. Análisis de Componentes Principales (PCA)<br />
+- Varianza explicada<br />
+- Componentes principales</p>
+<p><strong>VOLUMEN 2: Análisis Multivariante y Combinación de
+Variables</strong><br />
+1. Creación de tablas combinadas y resúmenes estadísticos por
+grupos<br />
+2. Análisis de relaciones entre variables cualitativas y
+cuantitativas<br />
+3. Visualización de patrones y agrupamientos detectados<br />
+4. Interpretación de resultados y conclusiones estadísticas</p>
+<p>El propósito de esta metodología es obtener una comprensión completa
+de los factores de riesgo cardiovascular, explorando cómo se relacionan
+las distintas variables entre sí y detectando patrones que puedan ser
+relevantes para la investigación epidemiológica y la salud pública.</p>
+</div>
+<div id="datos" class="section level2">
+<h2>DATOS</h2>
+<p>El conjunto de datos contiene información de 3.390 personas y un
+total de 15 variables. Cada una de ellas representa un posible factor de
+riesgo cardiovascular. A continuación, se describen brevemente las
+principales variables incluidas:</p>
+<p><strong>sex:</strong> variable binaria que indica el sexo del
+individuo (1 = hombre, 0 = mujer).<br />
+<strong>age:</strong> edad del participante en años.<br />
+<strong>education:</strong> nivel educativo alcanzado.<br />
+<strong>currentSmoker:</strong> indica si el individuo fuma actualmente
+(1 = sí, 0 = no).<br />
+<strong>cigsPerDay:</strong> número medio de cigarrillos fumados por
+día.<br />
+<strong>BPMeds:</strong> indica si la persona toma medicación para la
+presión arterial.<br />
+<strong>prevalentStroke:</strong> indica si el participante ha sufrido
+un ictus previo.<br />
+<strong>prevalentHyp:</strong> indica si el participante presenta
+hipertensión diagnosticada.<br />
+<strong>diabetes:</strong> indica si el participante padece
+diabetes.<br />
+<strong>totChol:</strong> nivel total de colesterol en mg/dL.<br />
+<strong>sysBP:</strong> presión arterial sistólica.<br />
+<strong>diaBP:</strong> presión arterial diastólica.<br />
+<strong>BMI:</strong> índice de masa corporal.<br />
+<strong>heartRate:</strong> frecuencia cardíaca en reposo.<br />
+<strong>glucose:</strong> nivel de glucosa en sangre.<br />
+<strong>TenYearCHD:</strong> variable objetivo que indica si el
+participante desarrollará o no enfermedad coronaria en los próximos 10
+años (1 = sí, 0 = no).</p>
+<p>Este conjunto de variables permitirá realizar un análisis completo de
+los factores que pueden influir en la salud cardiovascular, combinando
+información médica y hábitos de vida. El estudio se centrará en examinar
+las relaciones entre estas variables y en detectar patrones o
+asociaciones que aporten información sobre el riesgo de enfermedad
+cardíaca en la población analizada.</p>
+<pre class="r"><code>data &lt;- read.csv(&#39;./data/train.csv&#39;, header = T, sep = &#39;,&#39;, stringsAsFactors = F)</code></pre>
 </div>
 
 

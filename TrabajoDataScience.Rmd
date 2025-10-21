@@ -2,7 +2,7 @@
 title: "Trabajo Data Science"
 author: 
   - "Lucía Dávalos, María Cañal"
-subtitle: "ANÁLISIS DE VISUALIZACIÓN Y MACHINE LEARNING PARA LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES"
+subtitle: "ANÁLISIS ESTADÍSTICO PARA LA PREDICCIÓN DE ENFERMEDADES CARDIOVASCULARES"
 output:
   html_document:
       toc: true          # tabla de contenidos
