@@ -353,7 +353,25 @@ grafico_proporciones
 ```
 
 
+BOXPLOTS:
 
+age vs TenYearCHD: ver si las personas con riesgo de enfermedad coronaria tienden a ser mayores.
+
+totChol vs currentSmoker: analizar si los fumadores tienen niveles medios de colesterol más altos.
+
+BMI vs education: comprobar si el nivel educativo se asocia con un menor índice de masa corporal.
+
+sysBP vs sex: observar si los hombres presentan presiones arteriales más altas que las mujeres.
+
+glucose vs diabetes: validar que los diabéticos efectivamente tienen valores de glucosa más altos.
+
+heartRate vs TenYearCHD: explorar si hay relación entre frecuencia cardíaca y riesgo de CHD.
+
+totChol vs prevalentHyp: comparar colesterol entre personas con y sin hipertensión.
+
+BMI vs currentSmoker: comprobar si los fumadores tienen IMC diferente al de los no fumadores.
+
+age vs education: ver si la distribución de edades cambia con el nivel educativo (posible sesgo generacional).
 
 ```{r}
 mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
