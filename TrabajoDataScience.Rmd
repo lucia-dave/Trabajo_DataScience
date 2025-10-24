@@ -309,16 +309,15 @@ Queremos representar la cantidad de cada variable:
 ```{r}
 # Seleccionamos solo las variables de interés
 vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
-
-# Convertimos todas a factor antes de pivotar
 data_long <- data %>%
   mutate(across(all_of(vars), as.factor)) %>%
   select(all_of(vars)) %>%
   pivot_longer(cols = everything(), names_to = "variable", values_to = "valor") %>%
   group_by(variable, valor) %>%
-  summarise(conteo = n(), .groups = "drop")
+  summarise(conteo = n(), .groups = "drop") %>%
+  mutate(variable_valor = interaction(variable, valor, sep = ": "))
 
-# Definimos los colores
+# Definimos los colores personalizados
 colores <- c(
   "F" = "#F6BDC0",
   "M" = "#6BAED6",
@@ -332,13 +331,15 @@ colores <- c(
   "0" = "#FC9272"
 )
 
-grafico_cantidades <- ggplot(data = data_long) + 
-  geom_bar(
-    mapping = aes(x = variable, y = conteo, fill = valor),
-    position = 'dodge', stat = 'identity', color = "black", width = 0.7
-  ) +
-  scale_y_continuous(expand = expansion(mult = c(0.01, 0.05))) +
+# Gráfico
+grafico_cantidades <- ggplot(data_long, aes(x = variable, y = conteo, fill = valor)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), color = "black", width = 0.7) +
+  geom_text(aes(label = conteo),
+            position = position_dodge(width = 0.8),
+            vjust = -0.3, size = 3) +
   scale_fill_manual(values = colores, na.value = "grey80") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme_classic() +
   theme(
     plot.title = element_text(hjust = 0.5, margin = margin(0,0,10,0), size = 12, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1, margin = margin(0,0,10,0)),
@@ -350,9 +351,10 @@ grafico_cantidades <- ggplot(data = data_long) +
     panel.background = element_rect(colour = "black", size = 1),
     legend.title = element_blank()
   ) +
-  xlab("Variables") + 
+  xlab("Variable") +
   ylab("Conteo") +
   ggtitle("Conteo de Categorías por Variable Relevante")
+
 grafico_cantidades
 ```
 
