@@ -128,6 +128,27 @@ data$education <- factor(data$education,
                          levels=c(1,2,3,4),
                          labels=c("Basico", "Medio", "Tecnico", "Universitario")
 )
+
+#Cambiamos el valor de las variables 1 y 0 por YES y NO, para mayor comprensión e interpretación de los resultados obtenidos en las gráficas
+data$diabetes <- factor(data$diabetes,
+                        levels = c(0, 1),
+                        labels = c("NO", "YES"))
+
+data$prevalentStroke <- factor(data$prevalentStroke,
+                            levels = c(0, 1),
+                            labels = c("NO", "YES"))
+
+data$prevalentHyp <- factor(data$prevalentHyp,
+                            levels = c(0, 1),
+                            labels = c("NO", "YES"))
+
+
+data$TenYearCHD <- factor(data$TenYearCHD,
+                            levels = c(0, 1),
+                            labels = c("NO", "YES"))
+
+
+
 class(data$education) #Comprobamos que ahora la columa education es de tipo factor
 ```
 
@@ -213,23 +234,69 @@ Queremos representar las proporciones dentro de cada variable:
 
 ```{r}
 
-#TENEMOS QUE CAMBIAR ESTO 
-
-sex_proporciones <- ggplot(data, aes(x = factor(sex), fill = factor(sex))) + 
-  geom_bar(position = "fill") +  # "fill" convierte a proporciones
-  theme_classic() +
+sex_proporciones <- ggplot(data, aes(x = 1, fill = factor(sex))) + 
+  geom_bar(position = "fill", color = "black", width = 0.3) +  # "fill" convierte en proporciones
   scale_fill_manual(values = c("pink", "lightblue")) +
-  scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0.01,0.02))) +
+  scale_y_continuous(labels = percent, expand = expansion(mult = c(0.01, 0.02))) +
+  theme_classic() +
   theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.title = element_blank(),
         axis.ticks.y = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(colour = "black", size = 1)) +
+        panel.background = element_rect(colour = "black", size = 1),
+        legend.title = element_blank()) +
   ggtitle("Proporciones por Sexo")
 
 sex_proporciones
+
+
+# Seleccionamos solo las variables de interés
+vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
+
+# Convertimos todas a factor antes de pivotar
+data_long <- data %>%
+  mutate(across(all_of(vars), as.factor)) %>%
+  select(all_of(vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor")
+
+colores <- c(
+  "F" = "#F6BDC0",
+  "M" = "#6BAED6",
+  "Basico" = "#FED976",
+  "Medio" = "#FD8D3C",
+  "Tecnico" = "#31A354",
+  "Universitario" = "#756BB1",
+  "YES" = "#74C476",
+  "NO" = "#E34A33",
+  "1" = "#9ECAE1",
+  "0" = "#FC9272"
+)
+
+# Gráfico
+grafico_proporciones <- ggplot(data_long, aes(x = 1, fill = valor)) +
+  geom_bar(position = "fill", color = "black", width = 0.3) +
+  scale_fill_manual(values = colores, na.value = "grey80") +
+  scale_y_continuous(labels = percent, expand = expansion(mult = c(0.01, 0.02))) +
+  facet_wrap(~ variable, nrow = 1, scales = "free_x") +
+  theme_classic() +
+  theme(
+    axis.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank(),
+    strip.background = element_rect(fill = "white", color = "black"),
+    strip.text = element_text(face = "bold"),
+    panel.grid = element_blank(),
+    panel.background = element_rect(colour = "black", size = 1),
+    legend.title = element_blank()
+  ) +
+  ggtitle("Proporciones por Variables Relevantes")
+
+
+grafico_proporciones
+
 
 
 
