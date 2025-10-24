@@ -231,7 +231,59 @@ education_barras
 
 ```
 
-Queremos representar las proporciones dentro de cada variable:
+Queremos representar la cantidad de cada variable de carácter categórico: 
+
+```{r}
+# Seleccionamos solo las variables de interés
+vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
+
+# Convertimos todas a factor antes de pivotar
+data_long <- data %>%
+  mutate(across(all_of(vars), as.factor)) %>%
+  select(all_of(vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor") %>%
+  group_by(variable, valor) %>%
+  summarise(conteo = n(), .groups = "drop")
+
+# Definimos los colores
+colores <- c(
+  "F" = "#F6BDC0",
+  "M" = "#6BAED6",
+  "Basico" = "#FED976",
+  "Medio" = "#FD8D3C",
+  "Tecnico" = "#31A354",
+  "Universitario" = "#756BB1",
+  "YES" = "#74C476",
+  "NO" = "#E34A33",
+  "1" = "#9ECAE1",
+  "0" = "#FC9272"
+)
+
+grafico_cantidades <- ggplot(data = data_long) + 
+  geom_bar(
+    mapping = aes(x = variable, y = conteo, fill = valor),
+    position = 'dodge', stat = 'identity', color = "black", width = 0.7
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0.01, 0.05))) +
+  scale_fill_manual(values = colores, na.value = "grey80") +
+  theme(
+    plot.title = element_text(hjust = 0.5, margin = margin(0,0,10,0), size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, margin = margin(0,0,10,0)),
+    axis.text.y = element_text(margin = margin(0,0,0,10)),
+    axis.title.x = element_text(margin = margin(10,0,0,0)),
+    axis.title.y = element_text(margin = margin(0,10,0,0)),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(colour = "black", size = 1),
+    legend.title = element_blank()
+  ) +
+  xlab("Variables") + 
+  ylab("Conteo") +
+  ggtitle("Conteo de Categorías por Variable Relevante")
+grafico_cantidades
+```
+
+Representamos también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
 
 ```{r}
 
@@ -298,9 +350,6 @@ grafico_proporciones <- ggplot(data_long, aes(x = 1, fill = valor)) +
 
 grafico_proporciones
 
-
-
-
 ```
 
 Queremos representar la cantidad de cada variable: 
@@ -358,6 +407,25 @@ grafico_cantidades <- ggplot(data_long, aes(x = variable, y = conteo, fill = val
 grafico_cantidades
 ```
 
+BOXPLOTS:
+
+age vs TenYearCHD: ver si las personas con riesgo de enfermedad coronaria tienden a ser mayores.
+
+totChol vs currentSmoker: analizar si los fumadores tienen niveles medios de colesterol más altos.
+
+BMI vs education: comprobar si el nivel educativo se asocia con un menor índice de masa corporal.
+
+sysBP vs sex: observar si los hombres presentan presiones arteriales más altas que las mujeres.
+
+glucose vs diabetes: validar que los diabéticos efectivamente tienen valores de glucosa más altos.
+
+heartRate vs TenYearCHD: explorar si hay relación entre frecuencia cardíaca y riesgo de CHD.
+
+totChol vs prevalentHyp: comparar colesterol entre personas con y sin hipertensión.
+
+BMI vs currentSmoker: comprobar si los fumadores tienen IMC diferente al de los no fumadores.
+
+age vs education: ver si la distribución de edades cambia con el nivel educativo (posible sesgo generacional).
 
 ```{r}
 mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
