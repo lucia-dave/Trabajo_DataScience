@@ -353,7 +353,7 @@ grafico_proporciones
 ```
 
 
-BOXPLOTS:
+BOXPLOTS, DE QUE HACERLOS:
 
 age vs TenYearCHD: ver si las personas con riesgo de enfermedad coronaria tienden a ser mayores.
 
