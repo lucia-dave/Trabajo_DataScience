@@ -230,7 +230,7 @@ education_barras
 
 ```
 
-Queremos representar las proporciones dentro de cada variable:
+Queremos representar también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
 
 ```{r}
 
