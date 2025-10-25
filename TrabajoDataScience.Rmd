@@ -93,6 +93,8 @@ library(purrr)
 library(tibble)
 library(jsonlite)
 library(data.table)
+library(scales)
+
 ```
 
 Adquirimos los datos del csv:
@@ -424,6 +426,127 @@ totChol vs prevalentHyp: comparar colesterol entre personas con y sin hipertensi
 totChol vs TenYearCHD: comparar colesterol y riesgo de CHD.
 
 Y HACER LOS #PLUS
+```{r}
+
+library(ggplot2)
+
+# --- Boxplot 1: age vs TenYearCHD
+edad_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = age, fill = factor(TenYearCHD))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("lightgreen", "tomato")) +
+  labs(title = "Edad vs Riesgo de CHD", x = "Riesgo CHD (0=No, 1=Sí)", y = "Edad") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+# --- Boxplot 2: totChol vs currentSmoker
+totChol_is_smoking <- ggplot(data, aes(x = factor(is_smoking), y = totChol, fill = factor(is_smoking))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("lightblue", "orange")) +
+  labs(title = "Colesterol Total vs Fumador", x = "Fumador (0=No, 1=Sí)", y = "Colesterol Total") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+# --- Boxplot 3: sysBP vs sex
+sysBP_sex <- ggplot(data, aes(x = factor(sex), y = sysBP, fill = factor(sex))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("pink", "lightblue")) +
+  labs(title = "Presión Sistólica vs Sexo", x = "Sexo", y = "Presión Sistólica") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+# --- Boxplot 4: glucose vs diabetes
+glucose_diabetes <- ggplot(data, aes(x = factor(diabetes), y = glucose, fill = factor(diabetes))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("lightgreen", "tomato")) +
+  labs(title = "Glucosa vs Diabetes", x = "Diabetes", y = "Glucosa") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+# --- Boxplot 5: heartRate vs TenYearCHD
+heartRate_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = heartRate, fill = factor(TenYearCHD))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("lightgreen", "tomato")) +
+  labs(title = "Frecuencia Cardíaca vs CHD", x = "Riesgo CHD", y = "Frecuencia Cardíaca") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+# --- Boxplot 6: totChol vs prevalentHyp
+totChol_prevalentHyp <- ggplot(data, aes(x = factor(prevalentHyp), y = totChol, fill = factor(prevalentHyp))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("lightgreen", "orange")) +
+  labs(title = "Colesterol vs Hipertensión", x = "Hipertensión", y = "Colesterol Total") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+# --- Boxplot 7: totChol vs TenYearCHD
+totChol_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = totChol, fill = factor(TenYearCHD))) +
+  geom_boxplot() +
+  stat_boxplot(geom=  'errorbar') +
+  scale_fill_manual(values = c("lightgreen", "tomato")) +
+  labs(title = "Colesterol Total vs CHD", x = "Riesgo CHD", y = "Colesterol Total") +
+  theme_classic() +
+  theme(legend.position = "none")
+
+print(edad_TenYearCHD)
+print(totChol_is_smoking)
+print(sysBP_sex)
+print(glucose_diabetes)
+print(heartRate_TenYearCHD)
+print(totChol_prevalentHyp)
+print(totChol_TenYearCHD)
+
+```
+A partir de estos gráficos vamos a comprobar los outliers que interpretemos que pueden ser error de medición, sabiendo el rango de valores lógicos de cada variable.
+ 
+ - Colesterol total: 400–500 mg/dL
+ 
+ - Presión sistólica: >250 o <70
+ 
+ - Glucosa: >300
+ 
+ - Frecuencia cardíaca: <40 o >200
+ 
+ - Índice de masa corporal: >60 o <15
+
+```{r}
+
+data_clean <- data %>%
+  filter(
+    totChol >= 100 & totChol <= 500,  # Colesterol total
+    sysBP >= 70 & sysBP <= 250,       # Presión sistólica
+    glucose >= 50 & glucose <= 300,   # Glucosa
+    heartRate >= 40 & heartRate <= 200, # Frecuencia cardíaca
+    BMI >= 15 & BMI <= 60               # Índice de masa corporal
+  )
+
+```
+
+A continuación vamos a analizar la relación entre patologías cardiovasculares asociadas a una serie de variables:
+
+1)Analizar los casos cuya presión diastólica supere los 100 latidos por minuto, lo cual es un indicativo de hipertensión:
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
