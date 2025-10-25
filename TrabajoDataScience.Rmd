@@ -532,6 +532,17 @@ A continuación vamos a analizar la relación entre patologías cardiovasculares
 1)Analizar los casos cuya presión diastólica supere los 100 latidos por minuto, lo cual es un indicativo de hipertensión:
 
 ```{r}
+# Crear variable lógica para diaBP > 100
+data_clean$diaBP_alta <- data_clean$diaBP > 100
+
+# Boxplot de colesterol
+ggplot(data_clean, aes(x = diaBP_alta, y = prevalentHyp, fill = diaBP_alta)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("lightblue", "tomato")) +
+  labs(title = "Colesterol Total según presión diastólica >100 mmHg",
+       x = "Presión diastólica >100 mmHg (No=0, Sí=1)",
+       y = "Colesterol Total") +
+  theme_classic()
 
 ```
 
