@@ -531,6 +531,7 @@ A continuación vamos a analizar la relación entre patologías cardiovasculares
 
 1)Analizar los casos cuya presión diastólica supere los 100 latidos por minuto, lo cual es un indicativo de hipertensión:
 
+CAMBIAR CHAT
 ```{r}
 # 1️⃣ Presión diastólica (diaBP): analizar casos por encima de 100 mmHg (hipertensión diastólica)
 ggplot(data, aes(y = diaBP)) +
