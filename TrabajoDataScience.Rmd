@@ -533,6 +533,19 @@ A continuación vamos a analizar la relación entre patologías cardiovasculares
 
 CAMBIAR CHAT
 ```{r}
+<<<<<<< HEAD
+# Crear variable lógica para diaBP > 100
+data_clean$diaBP_alta <- data_clean$diaBP > 100
+
+# Boxplot de colesterol
+ggplot(data_clean, aes(x = diaBP_alta, y = prevalentHyp, fill = diaBP_alta)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("lightblue", "tomato")) +
+  labs(title = "Colesterol Total según presión diastólica >100 mmHg",
+       x = "Presión diastólica >100 mmHg (No=0, Sí=1)",
+       y = "Colesterol Total") +
+  theme_classic()
+=======
 # 1️⃣ Presión diastólica (diaBP): analizar casos por encima de 100 mmHg (hipertensión diastólica)
 ggplot(data, aes(y = diaBP)) +
   geom_boxplot(fill = "lightblue", color = "darkblue") +
@@ -561,6 +574,7 @@ data %>%
   filter(glucose > 150) %>%
   summarise(casos_altos_glucosa = n(),
             porcentaje = n()/nrow(data)*100)
+>>>>>>> 170bd2df2fd082954a3a8ca532f8e9aa02a563ab
 
 ```
 
