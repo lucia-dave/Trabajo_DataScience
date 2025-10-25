@@ -532,15 +532,98 @@ A continuación vamos a analizar la relación entre patologías cardiovasculares
 1)Analizar los casos cuya presión diastólica supere los 100 latidos por minuto, lo cual es un indicativo de hipertensión:
 
 ```{r}
+# 1️⃣ Presión diastólica (diaBP): analizar casos por encima de 100 mmHg (hipertensión diastólica)
+ggplot(data, aes(y = diaBP)) +
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(title = "Distribución de la presión diastólica",
+       y = "Presión diastólica (mmHg)") +
+  theme_minimal()
+
+# Casos con presión diastólica >100 mmHg
+data %>% 
+  filter(diaBP > 100) %>%
+  summarise(casos_hipertension_diastolica = n(),
+            porcentaje = n()/nrow(data)*100)
+
+```
+
+```{r}
+# 2️⃣ Glucosa: analizar la cola larga de valores altos >150-200 mg/dL (hiperglucemia/diabetes)
+ggplot(data, aes(y = glucose)) +
+  geom_boxplot(fill = "lightgreen", color = "darkgreen") +
+  labs(title = "Distribución de glucosa en sangre",
+       y = "Glucosa (mg/dL)") +
+  theme_minimal()
+
+# Casos con glucosa >150 mg/dL
+data %>%
+  filter(glucose > 150) %>%
+  summarise(casos_altos_glucosa = n(),
+            porcentaje = n()/nrow(data)*100)
 
 ```
 
 
+```{r}
+# 3️⃣ Frecuencia cardíaca (heartRate): analizar valores >100 bpm (taquicardia)
+ggplot(data, aes(y = heartRate)) +
+  geom_boxplot(fill = "lightpink", color = "red") +
+  labs(title = "Distribución de la frecuencia cardíaca",
+       y = "Frecuencia cardíaca (latidos por minuto)") +
+  theme_minimal()
+
+# Casos con heartRate >100 bpm
+data %>%
+  filter(heartRate > 100) %>%
+  summarise(casos_taquicardia = n(),
+            porcentaje = n()/nrow(data)*100)
+
+```
 
 
+```{r}
+# 4️⃣ Presión sistólica (sysBP): analizar valores elevados (hipertensión sistólica)
+ggplot(data, aes(y = sysBP)) +
+  geom_boxplot(fill = "orange", color = "darkorange") +
+  labs(title = "Distribución de la presión sistólica",
+       y = "Presión sistólica (mmHg)") +
+  theme_minimal()
+
+# Casos con sysBP >140 mmHg
+data %>%
+  filter(sysBP > 140) %>%
+  summarise(casos_hipertension_sistolica = n(),
+            porcentaje = n()/nrow(data)*100)
+
+# 5️⃣ Colesterol total (totChol): analizar casos extremos >300 mg/dL (hipercolesterolemia)
+ggplot(data, aes(y = totChol)) +
+  geom_boxplot(fill = "lightyellow", color = "goldenrod") +
+  labs(title = "Distribución del colesterol total",
+       y = "Colesterol total (mg/dL)") +
+  theme_minimal()
+
+# Casos con totChol >300 mg/dL
+data %>%
+  filter(totChol > 300) %>%
+  summarise(casos_hipercolesterolemia = n(),
+            porcentaje = n()/nrow(data)*100)
+```
 
 
+```{r}
+# 5️⃣ Colesterol total (totChol): analizar casos extremos >300 mg/dL (hipercolesterolemia)
+ggplot(data, aes(y = totChol)) +
+  geom_boxplot(fill = "lightyellow", color = "goldenrod") +
+  labs(title = "Distribución del colesterol total",
+       y = "Colesterol total (mg/dL)") +
+  theme_minimal()
 
+# Casos con totChol >300 mg/dL
+data %>%
+  filter(totChol > 300) %>%
+  summarise(casos_hipercolesterolemia = n(),
+            porcentaje = n()/nrow(data)*100)
+```
 
 
 
