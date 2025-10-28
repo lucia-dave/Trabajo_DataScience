@@ -78,6 +78,8 @@ Este conjunto de variables permitirá realizar un análisis completo de los fact
 # VOLUMEN 1: Análisis exploratorio y estadístico
 ## 1. Importar librerías y datos
 ```{r libraries,warning=FALSE,message=FALSE}
+
+install.packages("ggcorrplot")
 library(ggplot2)
 library(viridis)
 library(ggrepel)
@@ -94,6 +96,8 @@ library(tibble)
 library(jsonlite)
 library(data.table)
 library(scales)
+library(corrplot)
+
 
 ```
 
@@ -288,9 +292,6 @@ grafico_cantidades
 Representamos también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(scales) # para la función percent
 
 # Seleccionamos las variables de interés
 vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
@@ -642,6 +643,22 @@ data %>%
             porcentaje = n()/nrow(data)*100)
 ```
 
+ANÁLISIS DE CORRELACIONES 
+
+
+
+```{r}
+
+# Calcular correlaciones
+corr_matrix <- cor(data %>% dplyr::select_if(is.numeric), use = "complete.obs")
+
+# Visualizar
+corrplot(corr_matrix, method = "color", type = "upper",
+         tl.col = "black", tl.srt = 45, addCoef.col = "black",
+         col = colorRampPalette(c("blue", "white", "red"))(200),
+         title = "Matriz de correlación", mar = c(0,0,1,0))
+
+```
 
 
 ```{r}
