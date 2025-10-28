@@ -78,8 +78,6 @@ Este conjunto de variables permitirá realizar un análisis completo de los fact
 # VOLUMEN 1: Análisis exploratorio y estadístico
 ## 1. Importar librerías y datos
 ```{r libraries,warning=FALSE,message=FALSE}
-
-install.packages("ggcorrplot")
 library(ggplot2)
 library(viridis)
 library(ggrepel)
@@ -401,120 +399,6 @@ grafico_cantidades <- ggplot(data_long, aes(x = variable, y = conteo, fill = val
 grafico_cantidades
 ```
 
-BOXPLOTS:
-
-age vs TenYearCHD: ver si las personas con riesgo de enfermedad coronaria tienden a ser mayores.
-
-totChol vs currentSmoker: analizar si los fumadores tienen niveles medios de colesterol más altos.
-
-sysBP vs sex: observar si los hombres presentan presiones arteriales más altas que las mujeres.
-
-glucose vs diabetes: validar que los diabéticos efectivamente tienen valores de glucosa más altos.
-
-heartRate vs TenYearCHD: explorar si hay relación entre frecuencia cardíaca y riesgo de CHD.
-
-totChol vs prevalentHyp: comparar colesterol entre personas con y sin hipertensión.
-
-totChol vs TenYearCHD: comparar colesterol y riesgo de CHD.
-
-Y HACER LOS #PLUS
-```{r}
-# --- Boxplot 1: age vs TenYearCHD
-edad_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = age, fill = factor(TenYearCHD))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("lightgreen", "tomato")) +
-  labs(title = "Edad vs Riesgo de CHD", x = "Riesgo CHD", y = "Edad") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(edad_TenYearCHD)
-
-```
-El riesgo de enfermedad coronaria aumenta con la edad, observándose una mediana de edad superior en el grupo con CHD positivo.
-
-```{r}
-# --- Boxplot 2: totChol vs currentSmoker
-totChol_is_smoking <- ggplot(data, aes(x = factor(is_smoking), y = totChol, fill = factor(is_smoking))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("lightblue", "orange")) +
-  labs(title = "Colesterol Total vs Fumador", x = "Fumador", y = "Colesterol Total") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(totChol_is_smoking)
-```
-El hábito de fumar no parece tener un efecto notable sobre los niveles de colesterol total en esta muestra. El tabaquismo típicamente reduce HDL y aumenta triglicéridos, pero como estamos realizando una comparación con el colesterol total puede no apreciarse tanta diferencia. Se presentan outliers con valores excesivamente altos en colesterol.
-
-```{r}
-# --- Boxplot 3: sysBP vs sex
-sysBP_sex <- ggplot(data, aes(x = factor(sex), y = sysBP, fill = factor(sex))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("pink", "lightblue")) +
-  labs(title = "Presión Sistólica vs Sexo", x = "Sexo", y = "Presión Sistólica") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(sysBP_sex)
-```
-
-
-```{r}
-# --- Boxplot 4: glucose vs diabetes
-glucose_diabetes <- ggplot(data, aes(x = factor(diabetes), y = glucose, fill = factor(diabetes))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("lightgreen", "tomato")) +
-  labs(title = "Glucosa vs Diabetes", x = "Diabetes", y = "Glucosa") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(glucose_diabetes)
-```
-
-
-```{r}
-# --- Boxplot 5: heartRate vs TenYearCHD
-heartRate_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = heartRate, fill = factor(TenYearCHD))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("lightgreen", "tomato")) +
-  labs(title = "Frecuencia Cardíaca vs CHD", x = "Riesgo CHD", y = "Frecuencia Cardíaca") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(heartRate_TenYearCHD)
-```
-
-
-```{r}
-# --- Boxplot 6: totChol vs prevalentHyp
-totChol_prevalentHyp <- ggplot(data, aes(x = factor(prevalentHyp), y = totChol, fill = factor(prevalentHyp))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("lightgreen", "orange")) +
-  labs(title = "Colesterol vs Hipertensión", x = "Hipertensión", y = "Colesterol Total") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(totChol_prevalentHyp)
-```
-
-
-```{r}
-# --- Boxplot 7: totChol vs TenYearCHD
-totChol_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = totChol, fill = factor(TenYearCHD))) +
-  geom_boxplot() +
-  stat_boxplot(geom=  'errorbar') +
-  scale_fill_manual(values = c("lightgreen", "tomato")) +
-  labs(title = "Colesterol Total vs CHD", x = "Riesgo CHD", y = "Colesterol Total") +
-  theme_classic() +
-  theme(legend.position = "none")
-
-print(totChol_TenYearCHD)
-```
 
 
 A partir de estos gráficos vamos a comprobar los outliers que interpretemos que pueden ser error de medición, sabiendo el rango de valores lógicos de cada variable.
