@@ -288,26 +288,6 @@ grafico_cantidades
 Representamos también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
 
 ```{r}
-
-sex_proporciones <- ggplot(data, aes(x = 1, fill = factor(sex))) + 
-  geom_bar(position = "fill", color = "black", width = 0.3) +  # "fill" convierte en proporciones
-  scale_fill_manual(values = c("pink", "lightblue")) +
-  scale_y_continuous(labels = percent, expand = expansion(mult = c(0.01, 0.02))) +
-  theme_classic() +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect(colour = "black", size = 1),
-        legend.title = element_blank()) +
-  ggtitle("Proporciones por Sexo")
-
-sex_proporciones
-
-
 # Seleccionamos solo las variables de interés
 vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
 
@@ -427,9 +407,6 @@ totChol vs TenYearCHD: comparar colesterol y riesgo de CHD.
 
 Y HACER LOS #PLUS
 ```{r}
-
-library(ggplot2)
-
 # --- Boxplot 1: age vs TenYearCHD
 edad_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = age, fill = factor(TenYearCHD))) +
   geom_boxplot() +
@@ -516,7 +493,7 @@ A partir de estos gráficos vamos a comprobar los outliers que interpretemos que
 
 ```{r}
 
-data_clean <- data %>%
+data <- data %>%
   filter(
     totChol >= 100 & totChol <= 500,  # Colesterol total
     sysBP >= 70 & sysBP <= 250,       # Presión sistólica
@@ -529,7 +506,7 @@ data_clean <- data %>%
 
 A continuación vamos a analizar la relación entre patologías cardiovasculares asociadas a una serie de variables:
 
-1)Analizar los casos cuya presión diastólica supere los 100 latidos por minuto, lo cual es un indicativo de hipertensión:
+1)Analizar los casos cuya presión diastólica supere los 100 mmHg, lo cual es un indicativo de hipertensión:
 
 ```{r}
 ggplot(data, aes(y = diaBP)) +
