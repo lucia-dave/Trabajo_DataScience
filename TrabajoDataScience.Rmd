@@ -550,3 +550,92 @@ mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
 mediaEdad
 ```
 
+
+
+## CONTRASTE DE HIPÓTESIS: TEST EXACTO DE FISHER
+
+El test exacto de Fisher es una herramienta estadística empleada para determinar si existe asociación entre dos variables categóricas.  
+A diferencia del test Chi-cuadrado, resulta más adecuado cuando las frecuencias esperadas en las celdas de la tabla son bajas, como ocurre en muchos estudios médicos.  
+
+En este análisis se pretende evaluar si distintos factores de riesgo (tabaquismo, hipertensión, diabetes, uso de medicación y sexo) se asocian de forma significativa con la probabilidad de desarrollar una enfermedad coronaria a diez años (`TenYearCHD`).  
+Cada factor se analiza de forma independiente mediante el test exacto de Fisher, considerando la hipótesis alternativa de que dicho factor aumenta el riesgo de CHD.  
+Para controlar la tasa de falsos positivos al realizar múltiples pruebas, se aplica un ajuste de los valores *p* mediante el método de *False Discovery Rate (FDR)*.
+
+### HIPÓTESIS ESTADÍSTICAS
+
+- **Hipótesis nula (H₀):** El factor no influye en el riesgo de enfermedad coronaria.  
+- **Hipótesis alternativa (H₁):** El factor aumenta la probabilidad de padecer enfermedad coronaria (TenYearCHD = 1).
+
+### CÓDIGO DE ANÁLISIS
+
+```{r}
+# --- FACTORES DE RIESGO A EVALUAR ---
+factores <- c("currentSmoker", "prevalentHyp", "diabetes", "BPMeds", "sex")
+
+# --- FUNCIÓN PARA CALCULAR EL P-VALUE DEL TEST DE FISHER PARA CADA FACTOR ---
+fisher_test_CHD <- function(dataF, variable){
+  
+  # Crear tabla de contingencia 2x2
+  tabla <- table(dataF[[variable]], dataF$TenYearCHD)
+  
+  # Test de Fisher (alternativa "greater" porque buscamos factores que aumentan el riesgo)
+  test <- fisher.test(tabla, alternative = "greater")
+  
+  return(test$p.value)
+}
+
+# --- APLICAR LA FUNCIÓN A CADA FACTOR ---
+pvalues <- sapply(factores, fisher_test_CHD, dataF = data)
+
+# --- AJUSTAR P-VALUES POR FDR ---
+pvalues_adj <- p.adjust(pvalues, method = "fdr")
+
+# --- CALCULAR ODDS RATIO PARA CADA FACTOR ---
+odds_ratios <- sapply(factores, function(var){
+  tabla <- table(data[[var]], data$TenYearCHD)
+  fisher.test(tabla)$estimate
+})
+
+# --- COMBINAR RESULTADOS EN UNA TABLA ---
+resultados_fisher <- data.frame(
+  Factor = factores,
+  P_Value = round(pvalues, 4),
+  P_Value_Ajustado = round(pvalues_adj, 4),
+  Odds_Ratio = round(odds_ratios, 2)
+)
+
+# --- SELECCIONAR FACTORES SIGNIFICATIVOS (p-ajustado < 0.1) ---
+significativos <- resultados_fisher[resultados_fisher$P_Value_Ajustado < 0.1, ]
+
+# --- MOSTRAR RESULTADOS ---
+print(resultados_fisher)
+print("Factores de riesgo con efecto significativo (p ajustado < 0.1):")
+print(significativos)
+```
+
+
+PREGUNTAR ESTO A CHATI
+queria comentarte otra cosa que he hecho, no se si es correcta o si he de omitirla para el fisher o de que me sirve hacer este filtrado, dime que hago: A partir de estos gráficos vamos a comprobar los outliers que interpretemos que pueden ser error de medición, sabiendo el rango de valores lógicos de cada variable.
+ 
+ - Colesterol total: 400–500 mg/dL
+ 
+ - Presión sistólica: >250 o <70
+ 
+ - Glucosa: >300
+ 
+ - Frecuencia cardíaca: <40 o >200
+ 
+ - Índice de masa corporal: >60 o <15
+
+```{r}
+
+data <- data %>%
+  filter(
+    totChol >= 100 & totChol <= 500,  # Colesterol total
+    sysBP >= 70 & sysBP <= 250,       # Presión sistólica
+    glucose >= 50 & glucose <= 300,   # Glucosa
+    heartRate >= 40 & heartRate <= 200, # Frecuencia cardíaca
+    BMI >= 15 & BMI <= 60               # Índice de masa corporal
+  )
+
+```
