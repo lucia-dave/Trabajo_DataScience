@@ -288,15 +288,24 @@ grafico_cantidades
 Representamos también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
 
 ```{r}
-# Seleccionamos solo las variables de interés
+library(dplyr)
+library(ggplot2)
+library(scales) # para la función percent
+
+# Seleccionamos las variables de interés
 vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
 
-# Convertimos todas a factor antes de pivotar
+# Preparamos los datos con conteos y porcentajes
 data_long <- data %>%
   mutate(across(all_of(vars), as.factor)) %>%
   select(all_of(vars)) %>%
-  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor")
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor") %>%
+  group_by(variable, valor) %>%
+  summarise(conteo = n(), .groups = "drop") %>%
+  group_by(variable) %>%
+  mutate(porcentaje = conteo / sum(conteo))  # calculamos el porcentaje por variable
 
+# Colores
 colores <- c(
   "F" = "#F6BDC0",
   "M" = "#6BAED6",
@@ -310,9 +319,11 @@ colores <- c(
   "0" = "#FC9272"
 )
 
-# Gráfico
-grafico_proporciones <- ggplot(data_long, aes(x = 1, fill = valor)) +
-  geom_bar(position = "fill", color = "black", width = 0.3) +
+# Gráfico de proporciones con etiquetas de porcentaje
+grafico_proporciones <- ggplot(data_long, aes(x = 1, y = porcentaje, fill = valor)) +
+  geom_bar(stat = "identity", color = "black", width = 0.3) +
+  geom_text(aes(label = scales::percent(porcentaje, accuracy = 1)),
+            position = position_stack(vjust = 0.5), size = 3) +  # etiqueta en medio del segmento
   scale_fill_manual(values = colores, na.value = "grey80") +
   scale_y_continuous(labels = percent, expand = expansion(mult = c(0.01, 0.02))) +
   facet_wrap(~ variable, nrow = 1, scales = "free_x") +
@@ -329,10 +340,10 @@ grafico_proporciones <- ggplot(data_long, aes(x = 1, fill = valor)) +
   ) +
   ggtitle("Proporciones por Variables Relevantes")
 
-
 grafico_proporciones
 
 ```
+
 
 Queremos representar la cantidad de cada variable: 
 
