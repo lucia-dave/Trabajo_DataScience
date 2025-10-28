@@ -332,65 +332,7 @@ grafico_proporciones <- ggplot(data_long, aes(x = 1, fill = valor)) +
 
 grafico_proporciones
 
-
 ```
-```{r}
-library(dplyr)
-library(ggplot2)
-library(scales) # para la función percent
-
-# Seleccionamos las variables de interés
-vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
-
-# Preparamos los datos con conteos y porcentajes
-data_long <- data %>%
-  mutate(across(all_of(vars), as.factor)) %>%
-  select(all_of(vars)) %>%
-  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor") %>%
-  group_by(variable, valor) %>%
-  summarise(conteo = n(), .groups = "drop") %>%
-  group_by(variable) %>%
-  mutate(porcentaje = conteo / sum(conteo))  # calculamos el porcentaje por variable
-
-# Colores
-colores <- c(
-  "F" = "#F6BDC0",
-  "M" = "#6BAED6",
-  "Basico" = "#FED976",
-  "Medio" = "#FD8D3C",
-  "Tecnico" = "#31A354",
-  "Universitario" = "#756BB1",
-  "YES" = "#74C476",
-  "NO" = "#E34A33",
-  "1" = "#9ECAE1",
-  "0" = "#FC9272"
-)
-
-# Gráfico de proporciones con etiquetas de porcentaje
-grafico_proporciones <- ggplot(data_long, aes(x = 1, y = porcentaje, fill = valor)) +
-  geom_bar(stat = "identity", color = "black", width = 0.3) +
-  geom_text(aes(label = scales::percent(porcentaje, accuracy = 1)),
-            position = position_stack(vjust = 0.5), size = 3) +  # etiqueta en medio del segmento
-  scale_fill_manual(values = colores, na.value = "grey80") +
-  scale_y_continuous(labels = percent, expand = expansion(mult = c(0.01, 0.02))) +
-  facet_wrap(~ variable, nrow = 1, scales = "free_x") +
-  theme_classic() +
-  theme(
-    axis.title = element_blank(),
-    axis.text.x = element_blank(),
-    axis.ticks = element_blank(),
-    strip.background = element_rect(fill = "white", color = "black"),
-    strip.text = element_text(face = "bold"),
-    panel.grid = element_blank(),
-    panel.background = element_rect(colour = "black", size = 1),
-    legend.title = element_blank()
-  ) +
-  ggtitle("Proporciones por Variables Relevantes")
-
-grafico_proporciones
-
-```
-
 
 Queremos representar la cantidad de cada variable: 
 
@@ -470,19 +412,30 @@ edad_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = age, fill = fact
   geom_boxplot() +
   stat_boxplot(geom=  'errorbar') +
   scale_fill_manual(values = c("lightgreen", "tomato")) +
-  labs(title = "Edad vs Riesgo de CHD", x = "Riesgo CHD (0=No, 1=Sí)", y = "Edad") +
+  labs(title = "Edad vs Riesgo de CHD", x = "Riesgo CHD", y = "Edad") +
   theme_classic() +
   theme(legend.position = "none")
 
+print(edad_TenYearCHD)
+
+```
+El riesgo de enfermedad coronaria aumenta con la edad, observándose una mediana de edad superior en el grupo con CHD positivo.
+
+```{r}
 # --- Boxplot 2: totChol vs currentSmoker
 totChol_is_smoking <- ggplot(data, aes(x = factor(is_smoking), y = totChol, fill = factor(is_smoking))) +
   geom_boxplot() +
   stat_boxplot(geom=  'errorbar') +
   scale_fill_manual(values = c("lightblue", "orange")) +
-  labs(title = "Colesterol Total vs Fumador", x = "Fumador (0=No, 1=Sí)", y = "Colesterol Total") +
+  labs(title = "Colesterol Total vs Fumador", x = "Fumador", y = "Colesterol Total") +
   theme_classic() +
   theme(legend.position = "none")
 
+print(totChol_is_smoking)
+```
+Se observa una tendencia a valores más altos de colesterol entre los fumadores, lo que coincide con la literatura médica que asocia el tabaquismo con dislipidemias.
+
+```{r}
 # --- Boxplot 3: sysBP vs sex
 sysBP_sex <- ggplot(data, aes(x = factor(sex), y = sysBP, fill = factor(sex))) +
   geom_boxplot() +
@@ -492,6 +445,11 @@ sysBP_sex <- ggplot(data, aes(x = factor(sex), y = sysBP, fill = factor(sex))) +
   theme_classic() +
   theme(legend.position = "none")
 
+print(sysBP_sex)
+```
+
+
+```{r}
 # --- Boxplot 4: glucose vs diabetes
 glucose_diabetes <- ggplot(data, aes(x = factor(diabetes), y = glucose, fill = factor(diabetes))) +
   geom_boxplot() +
@@ -501,6 +459,11 @@ glucose_diabetes <- ggplot(data, aes(x = factor(diabetes), y = glucose, fill = f
   theme_classic() +
   theme(legend.position = "none")
 
+print(glucose_diabetes)
+```
+
+
+```{r}
 # --- Boxplot 5: heartRate vs TenYearCHD
 heartRate_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = heartRate, fill = factor(TenYearCHD))) +
   geom_boxplot() +
@@ -510,6 +473,11 @@ heartRate_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = heartRate, 
   theme_classic() +
   theme(legend.position = "none")
 
+print(heartRate_TenYearCHD)
+```
+
+
+```{r}
 # --- Boxplot 6: totChol vs prevalentHyp
 totChol_prevalentHyp <- ggplot(data, aes(x = factor(prevalentHyp), y = totChol, fill = factor(prevalentHyp))) +
   geom_boxplot() +
@@ -519,6 +487,11 @@ totChol_prevalentHyp <- ggplot(data, aes(x = factor(prevalentHyp), y = totChol, 
   theme_classic() +
   theme(legend.position = "none")
 
+print(totChol_prevalentHyp)
+```
+
+
+```{r}
 # --- Boxplot 7: totChol vs TenYearCHD
 totChol_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = totChol, fill = factor(TenYearCHD))) +
   geom_boxplot() +
@@ -528,15 +501,10 @@ totChol_TenYearCHD <- ggplot(data, aes(x = factor(TenYearCHD), y = totChol, fill
   theme_classic() +
   theme(legend.position = "none")
 
-print(edad_TenYearCHD)
-print(totChol_is_smoking)
-print(sysBP_sex)
-print(glucose_diabetes)
-print(heartRate_TenYearCHD)
-print(totChol_prevalentHyp)
 print(totChol_TenYearCHD)
-
 ```
+
+
 A partir de estos gráficos vamos a comprobar los outliers que interpretemos que pueden ser error de medición, sabiendo el rango de valores lógicos de cada variable.
  
  - Colesterol total: 400–500 mg/dL
