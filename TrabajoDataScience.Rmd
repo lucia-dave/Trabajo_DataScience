@@ -445,7 +445,7 @@ totChol_is_smoking <- ggplot(data, aes(x = factor(is_smoking), y = totChol, fill
 
 print(totChol_is_smoking)
 ```
-Se observa una tendencia a valores más altos de colesterol entre los fumadores, lo que coincide con la literatura médica que asocia el tabaquismo con dislipidemias.
+El hábito de fumar no parece tener un efecto notable sobre los niveles de colesterol total en esta muestra. El tabaquismo típicamente reduce HDL y aumenta triglicéridos, pero como estamos realizando una comparación con el colesterol total puede no apreciarse tanta diferencia. Se presentan outliers con valores excesivamente altos en colesterol.
 
 ```{r}
 # --- Boxplot 3: sysBP vs sex
