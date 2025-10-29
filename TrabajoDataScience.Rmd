@@ -603,65 +603,110 @@ mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
 mediaEdad
 ```
 
+## EJERCICIO 1: TEST DE FISHER
+En este ejercicio analizaremos la asociación entre los cuatro posibles factores de riesgo cardiovascular (tabaquismo, accidente cerebrovascular previo, hipertensión y diabetes) y el desarrollo de enfermedad coronaria en 10 años. Generando tablas de contingencia y evaluando la significancia estadística mediante el test de Fisher podremos comprobar si existe o no dicha relación.
 
+### CÓDIGO DE ANÁLISIS Y VISUALIZACIÓN
+```{r}
+#Factores de riesgo que queremos analizar
+factores <- c("is_smoking", "prevalentStroke", "prevalentHyp", "diabetes")
 
-## CONTRASTE DE HIPÓTESIS: TEST EXACTO DE FISHER
-
-El test exacto de Fisher es una herramienta estadística empleada para determinar si existe asociación entre dos variables categóricas.  
-A diferencia del test Chi-cuadrado, resulta más adecuado cuando las frecuencias esperadas en las celdas de la tabla son bajas, como ocurre en muchos estudios médicos.  
-
-En este análisis se pretende evaluar si distintos factores de riesgo (tabaquismo, hipertensión, diabetes, uso de medicación y sexo) se asocian de forma significativa con la probabilidad de desarrollar una enfermedad coronaria a diez años (`TenYearCHD`).  
-Cada factor se analiza de forma independiente mediante el test exacto de Fisher, considerando la hipótesis alternativa de que dicho factor aumenta el riesgo de CHD.  
-Para controlar la tasa de falsos positivos al realizar múltiples pruebas, se aplica un ajuste de los valores *p* mediante el método de *False Discovery Rate (FDR)*.
-
-### HIPÓTESIS ESTADÍSTICAS
-
-- **Hipótesis nula (H₀):** El factor no influye en el riesgo de enfermedad coronaria.  
-- **Hipótesis alternativa (H₁):** El factor aumenta la probabilidad de padecer enfermedad coronaria (TenYearCHD = 1).
-
-### CÓDIGO DE ANÁLISIS
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# --- FACTORES DE RIESGO A EVALUAR ---
-factores <- c("currentSmoker", "prevalentHyp", "diabetes", "BPMeds", "sex")
-
-# --- FUNCIÓN PARA CALCULAR EL P-VALUE DEL TEST DE FISHER PARA CADA FACTOR ---
-fisher_test_CHD <- function(data, variable){
+#Mostramos una tabla de contingencia para cada variable incluida en factores
+tablas <- lapply(factores, function(var) {
+  cat("\n\n### Tabla de contingencia:", var, "\n")
   
-  # Crear tabla de contingencia 2x2
-  tabla <- table(data[[variable]], data$TenYearCHD)
+  tabla <- matrix(0, nrow = 2, ncol = 2)
+  rownames(tabla) <- c("Sin factor", "Con factor")
+  colnames(tabla) <- c("Sin CHD", "Con CHD")
   
-  # Test de Fisher (alternativa "greater" porque buscamos factores que aumentan el riesgo)
-  test <- fisher.test(tabla, alternative = "greater")
+  idx_chd <- which(data$TenYearCHD == "YES")
   
-  return(test$p.value)
-}
-
-# --- APLICAR LA FUNCIÓN A CADA FACTOR ---
-pvalues <- sapply(factores, fisher_test_CHD, data = data)
-
-# --- AJUSTAR P-VALUES POR FDR ---
-pvalues_adj <- p.adjust(pvalues, method = "fdr")
-
-# --- CALCULAR ODDS RATIO PARA CADA FACTOR ---
-odds_ratios <- sapply(factores, function(var){
-  tabla <- table(data[[var]], data$TenYearCHD)
-  fisher.test(tabla)$estimate
+  tabla[1, 1] <- sum(data[-idx_chd, var] == "NO")   # Sin factor, Sin CHD
+  tabla[2, 1] <- sum(data[-idx_chd, var] == "YES")  # Con factor, Sin CHD
+  tabla[1, 2] <- sum(data[idx_chd, var] == "NO")    # Sin factor, Con CHD
+  tabla[2, 2] <- sum(data[idx_chd, var] == "YES")   # Con factor, Con CHD
+  
+  print(tabla)
+  return(tabla)
 })
-
-# --- COMBINAR RESULTADOS EN UNA TABLA ---
-resultados_fisher <- data.frame(
-  Factor = factores,
-  P_Value = round(pvalues, 4),
-  P_Value_Ajustado = round(pvalues_adj, 4),
-  Odds_Ratio = round(odds_ratios, 2)
-)
-
-# --- SELECCIONAR FACTORES SIGNIFICATIVOS (p-ajustado < 0.1) ---
-significativos <- resultados_fisher[resultados_fisher$P_Value_Ajustado < 0.1, ]
-
-# --- MOSTRAR RESULTADOS ---
-print(resultados_fisher)
-print("Factores de riesgo con efecto significativo (p ajustado < 0.1):")
-print(significativos)
+names(tablas) <- factores #Para poder acceder a ellas con más comodidad
 ```
+De estas las tablas de contingencia podemos sacar las siguientes conclusiones:
+
+1) is_smoking:
+  - Sin fumar: 203/1471 = 13.8% tienen CHD.
+  - Con fumar: 233/1438 = 16.2% tienen CHD.
+
+Presenta una asociación moderada con CDH, ya que apenas hay diferencias entre si fumar o no fumar afecta l riesgo de padecer alguna enfermedad cardiovascular en 10 años.
+  
+2) prevalentStroke:
+  - sin stroke: 429/2891 = 14.8% tienen CHD.
+  - con stroke: 7/18 = 38.9% tienen CHD.
+  
+Esto indica que el hecho de haber sufrido un accidente cerebrovascular previo hace que las probabilidades de tener un CHD sean mucho mayores a la de las personas sin antecedentes de stroke. Esta variable es por lo tanto un factor de riesgo coronario importante.
+
+3) prevalentHyp:
+  - Sin hipertensión: 221/1999 = 11.1% tienen CHD.
+  - Con hipertensión: 215/910 = 23.6% tienen CHD.
+  
+En este caso existe también una fuerte asociación entre tener hipertensión y sufrir algun tipo de riesgo cardiovascular.
+
+4) diabetes:
+  - Sin diabetes: 413/2839 = 14.5% tienen CHD.
+  - Con diabetes: 23/70 = 32.9% tienen CHD.
+  
+También podemos apreciar que el hecho de sufrir diabetes es un factor de riesgo al presentar una mayor proporción de casos con CHD.
+
+Sin embargo, a pesar de estas conclusiones que se obtienen a raíz de las tablas de contingencia, no sabemos aún con certeza si estos datos presentan significancia estadística. Pueden no ser fiables y llevarnos a estimaciones erróneas.
+Es importante fundamentar y razonar estadísticamente si los datos obtenidos son consistentes. Por ello, vamos a realizar un **test de Fisher** independiente para cada tabla obtenida. De esta forma podremos determinar si realmente existe alguna asociación entre cada factor de riesgo (tabaquismo, antecedentes de stroke, hipertensión y diabetes) frente a la posibilidad de desarrollar una enfermedad coronaria en los próximos 10 años (`TenYearCHD`).
+
+Las hipótesis estadísticas para este test son las siguientes:
+
+  -**Hipótesis nula (H₀):** el factor no influye en el riesgo de enfermedad coronaria.  
+  -**Hipótesis alternativa (H₁):** el factor aumenta la probabilidad de padecer enfermedad coronaria (TenYearCHD = 'YES').
+  
+```{r}
+lapply(tablas, fisher.test)
+```
+**INTERPRETACIÓN RESULTADOS:**
+Con un nivel de significancia α = 0.05:
+1. is_smoking (p-valor = 0.077): no se rechaza H₀. No hay evidencia estadística suficiente de asociación entre tabaquismo y CHD.
+
+Odds ratio = 1.21 indica un riesgo ligeramente mayor, pero no es significativo.
+
+2. prevalentStroke (p-valor = 0.012): se rechaza H₀. Existe asociación significativa entre haber sufrido un stroke y desarrollar CHD.
+
+Odds ratio = 3.65 indica que quienes tuvieron un stroke tienen 3.65 veces más probabilidad de desarrollar CHD.
+
+3. prevalentHyp (p-valor < 0.001): se rechaza H₀. Existe asociación muy significativa entre hipertensión y CHD.
+
+Odds ratio = 2.49 indica que las personas hipertensas tienen 2.49 veces más probabilidad de desarrollar CHD.
+
+4. diabetes (p-valor = 0.0001): se rechaza H₀. Existe asociación significativa entre diabetes y CHD.
+
+Odds ratio = 2.87 indica que las personas diabéticas tienen 2.87 veces más probabilidad de desarrollar CHD.
+
+**Conclusión**: los factores prevalentStroke, prevalentHyp y diabetes son factores de riesgo estadísticamente significativos para desarrollar enfermedad coronaria en la próxima década. El tabaquismo no muestra una asociación significativa.
+
+
+### CONTROL DE FALSOS POSITIVOS
+Para controlar la tasa de falsos positivos, se va a aplicar un ajuste de los valores *p* mediante el método de *False Discovery Rate (FDR)*.
+
+```{r}
+# --- AJUSTAR P-VALUES POR FDR ---
+resultados_df$P_Value_Ajustado <- p.adjust(resultados_df$P_Value, method = "fdr")
+
+# --- CLASIFICAR SIGNIFICATIVOS ---
+resultados_df <- resultados_df %>%
+  mutate(Significativo = ifelse(P_Value_Ajustado < 0.1, "Sí", "No"),
+         log_p = -log10(P_Value_Ajustado))
+
+# --- MOSTRAR TABLA DE RESULTADOS ---
+print(resultados_df)
+```
+
+## ANÁLISIS EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE FISHER)
+
+Para complementar el contraste de hipótesis, se genera una representación visual que muestra la fuerza de asociación (*odds ratio*) y la significación estadística (*p-values*) de cada factor analizado.  
+De esta forma, se facilita la identificación de los factores de riesgo más influyentes.
+

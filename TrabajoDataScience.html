@@ -375,27 +375,22 @@ descriptiva de variables</a>
 <ul>
 <li><a href="#conclusiones" id="toc-conclusiones">CONCLUSIONES:</a></li>
 </ul></li>
-<li><a href="#contraste-de-hip%C3%B3tesis-test-exacto-de-fisher" id="toc-contraste-de-hipótesis-test-exacto-de-fisher">CONTRASTE DE
-HIPÓTESIS: TEST EXACTO DE FISHER</a>
+<li><a href="#ejercicio-1-test-de-fisher" id="toc-ejercicio-1-test-de-fisher">EJERCICIO 1: TEST DE FISHER</a>
 <ul>
-<li><a href="#hip%C3%B3tesis-estad%C3%ADsticas" id="toc-hipótesis-estadísticas">HIPÓTESIS ESTADÍSTICAS</a></li>
-<li><a href="#c%C3%B3digo-de-an%C3%A1lisis" id="toc-código-de-análisis">CÓDIGO DE ANÁLISIS</a></li>
+<li><a href="#c%C3%B3digo-de-an%C3%A1lisis-y-visualizaci%C3%B3n" id="toc-código-de-análisis-y-visualización">CÓDIGO DE ANÁLISIS Y
+VISUALIZACIÓN</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#funci%C3%B3n-para-calcular-el-p-value-del-test-de-fisher-para-cada-factor" id="toc-función-para-calcular-el-p-value-del-test-de-fisher-para-cada-factor">—
-FUNCIÓN PARA CALCULAR EL P-VALUE DEL TEST DE FISHER PARA CADA FACTOR
-—</a></li>
-<li><a href="#aplicar-la-funci%C3%B3n-a-cada-factor" id="toc-aplicar-la-función-a-cada-factor">— APLICAR LA FUNCIÓN A CADA
-FACTOR —</a></li>
+<li><a href="#organizar-resultados-en-un-dataframe" id="toc-organizar-resultados-en-un-dataframe">— ORGANIZAR RESULTADOS EN
+UN dataFRAME —</a></li>
 <li><a href="#ajustar-p-values-por-fdr" id="toc-ajustar-p-values-por-fdr">— AJUSTAR P-VALUES POR FDR —</a></li>
-<li><a href="#calcular-odds-ratio-para-cada-factor" id="toc-calcular-odds-ratio-para-cada-factor">— CALCULAR ODDS RATIO PARA
-CADA FACTOR —</a></li>
-<li><a href="#combinar-resultados-en-una-tabla" id="toc-combinar-resultados-en-una-tabla">— COMBINAR RESULTADOS EN UNA
-TABLA —</a></li>
-<li><a href="#seleccionar-factores-significativos-p-ajustado-0.1" id="toc-seleccionar-factores-significativos-p-ajustado-0.1">—
-SELECCIONAR FACTORES SIGNIFICATIVOS (p-ajustado &lt; 0.1) —</a></li>
-<li><a href="#mostrar-resultados" id="toc-mostrar-resultados">— MOSTRAR
-RESULTADOS —</a></li>
+<li><a href="#clasificar-significativos" id="toc-clasificar-significativos">— CLASIFICAR SIGNIFICATIVOS
+—</a></li>
+<li><a href="#mostrar-tabla-de-resultados" id="toc-mostrar-tabla-de-resultados">— MOSTRAR TABLA DE RESULTADOS —</a>
+<ul>
+<li><a href="#an%C3%A1lisis-extendido-visualizaci%C3%B3n-de-asociaciones-test-de-fisher" id="toc-análisis-extendido-visualización-de-asociaciones-test-de-fisher">ANÁLISIS
+EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE FISHER)</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -651,7 +646,7 @@ se encuentra fuera de los rangos deseados:</p>
 #Detectar cuántos valores quedan fuera de rango en cada variable que queremos filtrar
 outliers_summary &lt;- data.frame(
   Variable = c(&quot;totChol&quot;, &quot;sysBP&quot;, &quot;glucose&quot;, &quot;heartRate&quot;, &quot;BMI&quot;),
-  Fuera_Rango = c(
+  Registros_Fuera_Rango = c(
     sum(data$totChol &lt; 100 | data$totChol &gt; 500, na.rm = TRUE),
     sum(data$sysBP &lt; 70 | data$sysBP &gt; 250, na.rm = TRUE),
     sum(data$glucose &lt; 50 | data$glucose &gt; 300, na.rm = TRUE),
@@ -661,12 +656,12 @@ outliers_summary &lt;- data.frame(
 )
 
 print(outliers_summary)</code></pre>
-<pre><code>##    Variable Fuera_Rango
-## 1   totChol           1
-## 2     sysBP           1
-## 3   glucose          16
-## 4 heartRate           0
-## 5       BMI           0</code></pre>
+<pre><code>##    Variable Registros_Fuera_Rango
+## 1   totChol                     1
+## 2     sysBP                     1
+## 3   glucose                    16
+## 4 heartRate                     0
+## 5       BMI                     0</code></pre>
 <p>En segundo lugar, aplicamos el filtrado deseado a nuestro conjunto de
 datos, y posteriormente obtenemos la diferencia del número de registros
 tras la depuración:</p>
@@ -1066,81 +1061,230 @@ mediaEdad</code></pre>
 <pre><code>## [1] 49.47714</code></pre>
 </div>
 </div>
-<div id="contraste-de-hipótesis-test-exacto-de-fisher" class="section level2">
-<h2>CONTRASTE DE HIPÓTESIS: TEST EXACTO DE FISHER</h2>
-<p>El test exacto de Fisher es una herramienta estadística empleada para
-determinar si existe asociación entre dos variables categóricas.<br />
-A diferencia del test Chi-cuadrado, resulta más adecuado cuando las
-frecuencias esperadas en las celdas de la tabla son bajas, como ocurre
-en muchos estudios médicos.</p>
-<p>En este análisis se pretende evaluar si distintos factores de riesgo
-(tabaquismo, hipertensión, diabetes, uso de medicación y sexo) se
-asocian de forma significativa con la probabilidad de desarrollar una
-enfermedad coronaria a diez años (<code>TenYearCHD</code>).<br />
-Cada factor se analiza de forma independiente mediante el test exacto de
-Fisher, considerando la hipótesis alternativa de que dicho factor
-aumenta el riesgo de CHD.<br />
-Para controlar la tasa de falsos positivos al realizar múltiples
-pruebas, se aplica un ajuste de los valores <em>p</em> mediante el
-método de <em>False Discovery Rate (FDR)</em>.</p>
-<div id="hipótesis-estadísticas" class="section level3">
-<h3>HIPÓTESIS ESTADÍSTICAS</h3>
+<div id="ejercicio-1-test-de-fisher" class="section level2">
+<h2>EJERCICIO 1: TEST DE FISHER</h2>
+<p>En este ejercicio analizaremos la asociación entre los cuatro
+posibles factores de riesgo cardiovascular (tabaquismo, accidente
+cerebrovascular previo, hipertensión y diabetes) y el desarrollo de
+enfermedad coronaria en 10 años. Generando tablas de contingencia y
+evaluando la significancia estadística mediante el test de Fisher
+podremos comprobar si existe o no dicha relación.</p>
+<div id="código-de-análisis-y-visualización" class="section level3">
+<h3>CÓDIGO DE ANÁLISIS Y VISUALIZACIÓN</h3>
+<pre class="r"><code>#Factores de riesgo que queremos analizar
+factores &lt;- c(&quot;is_smoking&quot;, &quot;prevalentStroke&quot;, &quot;prevalentHyp&quot;, &quot;diabetes&quot;)
+
+#Mostramos una tabla de contingencia para cada variable incluida en factores
+tablas &lt;- lapply(factores, function(var) {
+  cat(&quot;\n\n### Tabla de contingencia:&quot;, var, &quot;\n&quot;)
+  
+  tabla &lt;- matrix(0, nrow = 2, ncol = 2)
+  rownames(tabla) &lt;- c(&quot;Sin factor&quot;, &quot;Con factor&quot;)
+  colnames(tabla) &lt;- c(&quot;Sin CHD&quot;, &quot;Con CHD&quot;)
+  
+  idx_chd &lt;- which(data$TenYearCHD == &quot;YES&quot;)
+  
+  tabla[1, 1] &lt;- sum(data[-idx_chd, var] == &quot;NO&quot;)   # Sin factor, Sin CHD
+  tabla[2, 1] &lt;- sum(data[-idx_chd, var] == &quot;YES&quot;)  # Con factor, Sin CHD
+  tabla[1, 2] &lt;- sum(data[idx_chd, var] == &quot;NO&quot;)    # Sin factor, Con CHD
+  tabla[2, 2] &lt;- sum(data[idx_chd, var] == &quot;YES&quot;)   # Con factor, Con CHD
+  
+  print(tabla)
+  return(tabla)
+})</code></pre>
+<pre><code>## 
+## 
+## ### Tabla de contingencia: is_smoking 
+##            Sin CHD Con CHD
+## Sin factor    1268     203
+## Con factor    1205     233
+## 
+## 
+## ### Tabla de contingencia: prevalentStroke 
+##            Sin CHD Con CHD
+## Sin factor    2462     429
+## Con factor      11       7
+## 
+## 
+## ### Tabla de contingencia: prevalentHyp 
+##            Sin CHD Con CHD
+## Sin factor    1778     221
+## Con factor     695     215
+## 
+## 
+## ### Tabla de contingencia: diabetes 
+##            Sin CHD Con CHD
+## Sin factor    2426     413
+## Con factor      47      23</code></pre>
+<pre class="r"><code>names(tablas) &lt;- factores #Para poder acceder a ellas con más comodidad</code></pre>
+<p>De estas las tablas de contingencia podemos sacar las siguientes
+conclusiones:</p>
+<ol style="list-style-type: decimal">
+<li>is_smoking:</li>
+</ol>
 <ul>
-<li><strong>Hipótesis nula (H₀):</strong> El factor no influye en el
-riesgo de enfermedad coronaria.<br />
-</li>
-<li><strong>Hipótesis alternativa (H₁):</strong> El factor aumenta la
-probabilidad de padecer enfermedad coronaria (TenYearCHD = 1).</li>
+<li>Sin fumar: 203/1471 = 13.8% tienen CHD.</li>
+<li>Con fumar: 233/1438 = 16.2% tienen CHD.</li>
 </ul>
+<p>Presenta una asociación moderada con CDH, ya que apenas hay
+diferencias entre si fumar o no fumar afecta l riesgo de padecer alguna
+enfermedad cardiovascular en 10 años.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>prevalentStroke:</li>
+</ol>
+<ul>
+<li>sin stroke: 429/2891 = 14.8% tienen CHD.</li>
+<li>con stroke: 7/18 = 38.9% tienen CHD.</li>
+</ul>
+<p>Esto indica que el hecho de haber sufrido un accidente
+cerebrovascular previo hace que las probabilidades de tener un CHD sean
+mucho mayores a la de las personas sin antecedentes de stroke. Esta
+variable es por lo tanto un factor de riesgo coronario importante.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>prevalentHyp:</li>
+</ol>
+<ul>
+<li>Sin hipertensión: 221/1999 = 11.1% tienen CHD.</li>
+<li>Con hipertensión: 215/910 = 23.6% tienen CHD.</li>
+</ul>
+<p>En este caso existe también una fuerte asociación entre tener
+hipertensión y sufrir algun tipo de riesgo cardiovascular.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>diabetes:</li>
+</ol>
+<ul>
+<li>Sin diabetes: 413/2839 = 14.5% tienen CHD.</li>
+<li>Con diabetes: 23/70 = 32.9% tienen CHD.</li>
+</ul>
+<p>También podemos apreciar que el hecho de sufrir diabetes es un factor
+de riesgo al presentar una mayor proporción de casos con CHD.</p>
+<p>A pesar de estas conclusiones que se obtienen a raíz de las tablas de
+contingencia, no sabemos con certeza aún si estos datos presentan
+significancia estadística. Pueden no ser fiables y llevarnos a
+estimaciones erróneas. Es importante fundamentar y razonar
+estadísticamente si los datos obtenidos son consistentes. Por ello,
+vamos a realizar un <strong>test de Fisher</strong> independiente para
+cada tabla obtenida. De esta forma podremos determinar si realmente
+existe alguna asociación entre cada factor de riesgo (tabaquismo,
+antecedentes de stroke, hipertensión y diabetes) frente a la posibilidad
+de desarrollar una enfermedad coronaria en los próximos 10 años
+(<code>TenYearCHD</code>).</p>
+<p>Las hipótesis estadísticas para este test son las siguientes:</p>
+<p>-<strong>Hipótesis nula (H₀):</strong> el factor no influye en el
+riesgo de enfermedad coronaria.<br />
+-<strong>Hipótesis alternativa (H₁):</strong> el factor aumenta la
+probabilidad de padecer enfermedad coronaria (TenYearCHD = ‘YES’).</p>
+<pre class="r"><code>lapply(tablas, fisher.test)</code></pre>
+<pre><code>## $is_smoking
+## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  X[[i]]
+## p-value = 0.07729
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  0.979796 1.489541
+## sample estimates:
+## odds ratio 
+##    1.20771 
+## 
+## 
+## $prevalentStroke
+## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  X[[i]]
+## p-value = 0.01152
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##   1.192639 10.378202
+## sample estimates:
+## odds ratio 
+##   3.649706 
+## 
+## 
+## $prevalentHyp
+## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  X[[i]]
+## p-value &lt; 2.2e-16
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  2.011195 3.077865
+## sample estimates:
+## odds ratio 
+##   2.487953 
+## 
+## 
+## $diabetes
+## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  X[[i]]
+## p-value = 0.0001266
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  1.646290 4.886965
+## sample estimates:
+## odds ratio 
+##   2.873127</code></pre>
+<p><strong>INTERPRETACIÓN RESULTADOS:</strong> Con un nivel de
+significancia α = 0.05: 1. is_smoking (p-valor = 0.077): no se rechaza
+H₀. No hay evidencia estadística suficiente de asociación entre
+tabaquismo y CHD. Odds ratio = 1.21 indica un riesgo ligeramente mayor,
+pero no es significativo.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>prevalentStroke (p-valor = 0.012): se rechaza H₀. Existe
+asociación significativa entre haber sufrido un stroke y desarrollar
+CHD. Odds ratio = 3.65 indica que quienes tuvieron un stroke tienen 3.65
+veces más probabilidad de desarrollar CHD.</p></li>
+<li><p>prevalentHyp (p-valor &lt; 0.001): se rechaza H₀. Existe
+asociación muy significativa entre hipertensión y CHD. Odds ratio = 2.49
+indica que las personas hipertensas tienen 2.49 veces más probabilidad
+de desarrollar CHD.</p></li>
+<li><p>diabetes (p-valor = 0.0001): se rechaza H₀. Existe asociación
+significativa entre diabetes y CHD. Odds ratio = 2.87 indica que las
+personas diabéticas tienen 2.87 veces más probabilidad de desarrollar
+CHD.</p></li>
+</ol>
+<p><strong>Conclusión</strong>: Los factores prevalentStroke,
+prevalentHyp y diabetes son factores de riesgo estadísticamente
+significativos para desarrollar enfermedad coronaria en la próxima
+década. El tabaquismo no muestra una asociación significativa.</p>
+<p>Además, para controlar la tasa de falsos positivos, se va a aplicar
+un ajuste de los valores <em>p</em> mediante el método de <em>False
+Discovery Rate (FDR)</em>.</p>
 </div>
-<div id="código-de-análisis" class="section level3">
-<h3>CÓDIGO DE ANÁLISIS</h3>
-<p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# — FACTORES DE RIESGO A EVALUAR — factores &lt;- c(“currentSmoker”,
-“prevalentHyp”, “diabetes”, “BPMeds”, “sex”)</p>
 </div>
 </div>
-</div>
-<div id="función-para-calcular-el-p-value-del-test-de-fisher-para-cada-factor" class="section level1">
-<h1>— FUNCIÓN PARA CALCULAR EL P-VALUE DEL TEST DE FISHER PARA CADA
-FACTOR —</h1>
-<p>fisher_test_CHD &lt;- function(data, variable){</p>
-<p># Crear tabla de contingencia 2x2 tabla &lt;- table(data[[variable]],
-data$TenYearCHD)</p>
-<p># Test de Fisher (alternativa “greater” porque buscamos factores que
-aumentan el riesgo) test &lt;- fisher.test(tabla, alternative =
-“greater”)</p>
-<p>return(test$p.value) }</p>
-</div>
-<div id="aplicar-la-función-a-cada-factor" class="section level1">
-<h1>— APLICAR LA FUNCIÓN A CADA FACTOR —</h1>
-<p>pvalues &lt;- sapply(factores, fisher_test_CHD, data = data)</p>
+<div id="organizar-resultados-en-un-dataframe" class="section level1">
+<h1>— ORGANIZAR RESULTADOS EN UN dataFRAME —</h1>
 </div>
 <div id="ajustar-p-values-por-fdr" class="section level1">
 <h1>— AJUSTAR P-VALUES POR FDR —</h1>
-<p>pvalues_adj &lt;- p.adjust(pvalues, method = “fdr”)</p>
+<p>resultados_df<span class="math inline">\(P_Value_Ajustado &lt;-
+p.adjust(resultados_df\)</span>P_Value, method = “fdr”)</p>
 </div>
-<div id="calcular-odds-ratio-para-cada-factor" class="section level1">
-<h1>— CALCULAR ODDS RATIO PARA CADA FACTOR —</h1>
-<p>odds_ratios &lt;- sapply(factores, function(var){ tabla &lt;-
-table(data[[var]], data<span class="math inline">\(TenYearCHD)
-  fisher.test(tabla)\)</span>estimate })</p>
+<div id="clasificar-significativos" class="section level1">
+<h1>— CLASIFICAR SIGNIFICATIVOS —</h1>
+<p>resultados_df &lt;- resultados_df %&gt;% mutate(Significativo =
+ifelse(P_Value_Ajustado &lt; 0.1, “Sí”, “No”), log_p =
+-log10(P_Value_Ajustado))</p>
 </div>
-<div id="combinar-resultados-en-una-tabla" class="section level1">
-<h1>— COMBINAR RESULTADOS EN UNA TABLA —</h1>
-<p>resultados_fisher &lt;- data.frame( Factor = factores, P_Value =
-round(pvalues, 4), P_Value_Ajustado = round(pvalues_adj, 4), Odds_Ratio
-= round(odds_ratios, 2) )</p>
+<div id="mostrar-tabla-de-resultados" class="section level1">
+<h1>— MOSTRAR TABLA DE RESULTADOS —</h1>
+<p>print(resultados_df)</p>
+<div id="análisis-extendido-visualización-de-asociaciones-test-de-fisher" class="section level2">
+<h2>ANÁLISIS EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE
+FISHER)</h2>
+<p>Para complementar el contraste de hipótesis, se genera una
+representación visual que muestra la fuerza de asociación (<em>odds
+ratio</em>) y la significación estadística (<em>p-values</em>) de cada
+factor analizado.<br />
+De esta forma, se facilita la identificación de los factores de riesgo
+más influyentes.</p>
 </div>
-<div id="seleccionar-factores-significativos-p-ajustado-0.1" class="section level1">
-<h1>— SELECCIONAR FACTORES SIGNIFICATIVOS (p-ajustado &lt; 0.1) —</h1>
-<p>significativos &lt;-
-resultados_fisher[resultados_fisher$P_Value_Ajustado &lt; 0.1, ]</p>
-</div>
-<div id="mostrar-resultados" class="section level1">
-<h1>— MOSTRAR RESULTADOS —</h1>
-<p>print(resultados_fisher) print(“Factores de riesgo con efecto
-significativo (p ajustado &lt; 0.1):”) print(significativos) ```</p>
 </div>
 
 
