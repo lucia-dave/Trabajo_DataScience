@@ -157,6 +157,59 @@ data$TenYearCHD <- factor(data$TenYearCHD,
 class(data$education) #Comprobamos que ahora la columa education es de tipo factor
 ```
 
+Antes de aplicar los análisis estadísticos, es importante realizar una depuración de los datos para eliminar posibles errores de medición.  
+Este paso busca garantizar la validez y consistencia de los análisis posteriores, evitando que valores imposibles distorsionen los resultados.
+Los valores fisiológicos coherentes para las variables numéricas son los siguientes:
+
+ - Colesterol total: 400–500 mg/dL
+ 
+ - Presión sistólica: >250 o <70
+ 
+ - Glucosa: >300
+ 
+ - Frecuencia cardíaca: <40 o >200
+ 
+ - Índice de masa corporal: >60 o <15
+ 
+En primer lugar, analizamos en número de valores de cada variable que se encuentra fuera de los rangos deseados:
+ 
+```{r}
+n_original <- nrow(data) #Guardamos el número original de filas antes de depurar datos
+
+#Detectar cuántos valores quedan fuera de rango en cada variable que queremos filtrar
+outliers_summary <- data.frame(
+  Variable = c("totChol", "sysBP", "glucose", "heartRate", "BMI"),
+  Registros_Fuera_Rango = c(
+    sum(data$totChol < 100 | data$totChol > 500, na.rm = TRUE),
+    sum(data$sysBP < 70 | data$sysBP > 250, na.rm = TRUE),
+    sum(data$glucose < 50 | data$glucose > 300, na.rm = TRUE),
+    sum(data$heartRate < 40 | data$heartRate > 200, na.rm = TRUE),
+    sum(data$BMI < 15 | data$BMI > 60, na.rm = TRUE)
+  )
+)
+
+print(outliers_summary)
+```
+
+En segundo lugar, aplicamos el filtrado deseado a nuestro conjunto de datos, y posteriormente obtenemos la diferencia del número de registros tras la depuración:
+```{r}
+#Aplicamos el filtrado con los rangos fisiológicamente válidos
+data <- data %>%
+  filter(
+    totChol >= 100 & totChol <= 500,  # Colesterol total
+    sysBP >= 70 & sysBP <= 250,       # Presión sistólica
+    glucose >= 50 & glucose <= 300,   # Glucosa
+    heartRate >= 40 & heartRate <= 200, # Frecuencia cardíaca
+    BMI >= 15 & BMI <= 60               # Índice de masa corporal
+  )
+
+#Calculamos la diferencia de registros
+n_final <- nrow(data)
+n_eliminados <- n_original - n_final
+
+cat("Número de registros originales:", n_original, "\nNúmero de registros tras limpieza:", n_final, "\nTotal de registros eliminados:", n_eliminados, "\n\n")
+```
+
 ## 3. Visualización descriptiva de variables 
 Se llevará a cabo un análisis visual preliminar para comprender mejor el comportamiento de las variables y observar posibles relaciones o diferencias antes de proceder con los análisis estadísticos.
 
@@ -568,15 +621,15 @@ Para controlar la tasa de falsos positivos al realizar múltiples pruebas, se ap
 
 ### CÓDIGO DE ANÁLISIS
 
-```{r}
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 # --- FACTORES DE RIESGO A EVALUAR ---
 factores <- c("currentSmoker", "prevalentHyp", "diabetes", "BPMeds", "sex")
 
 # --- FUNCIÓN PARA CALCULAR EL P-VALUE DEL TEST DE FISHER PARA CADA FACTOR ---
-fisher_test_CHD <- function(dataF, variable){
+fisher_test_CHD <- function(data, variable){
   
   # Crear tabla de contingencia 2x2
-  tabla <- table(dataF[[variable]], dataF$TenYearCHD)
+  tabla <- table(data[[variable]], data$TenYearCHD)
   
   # Test de Fisher (alternativa "greater" porque buscamos factores que aumentan el riesgo)
   test <- fisher.test(tabla, alternative = "greater")
@@ -585,7 +638,7 @@ fisher_test_CHD <- function(dataF, variable){
 }
 
 # --- APLICAR LA FUNCIÓN A CADA FACTOR ---
-pvalues <- sapply(factores, fisher_test_CHD, dataF = data)
+pvalues <- sapply(factores, fisher_test_CHD, data = data)
 
 # --- AJUSTAR P-VALUES POR FDR ---
 pvalues_adj <- p.adjust(pvalues, method = "fdr")
@@ -611,31 +664,4 @@ significativos <- resultados_fisher[resultados_fisher$P_Value_Ajustado < 0.1, ]
 print(resultados_fisher)
 print("Factores de riesgo con efecto significativo (p ajustado < 0.1):")
 print(significativos)
-```
-
-
-PREGUNTAR ESTO A CHATI
-queria comentarte otra cosa que he hecho, no se si es correcta o si he de omitirla para el fisher o de que me sirve hacer este filtrado, dime que hago: A partir de estos gráficos vamos a comprobar los outliers que interpretemos que pueden ser error de medición, sabiendo el rango de valores lógicos de cada variable.
- 
- - Colesterol total: 400–500 mg/dL
- 
- - Presión sistólica: >250 o <70
- 
- - Glucosa: >300
- 
- - Frecuencia cardíaca: <40 o >200
- 
- - Índice de masa corporal: >60 o <15
-
-```{r}
-
-data <- data %>%
-  filter(
-    totChol >= 100 & totChol <= 500,  # Colesterol total
-    sysBP >= 70 & sysBP <= 250,       # Presión sistólica
-    glucose >= 50 & glucose <= 300,   # Glucosa
-    heartRate >= 40 & heartRate <= 200, # Frecuencia cardíaca
-    BMI >= 15 & BMI <= 60               # Índice de masa corporal
-  )
-
 ```
