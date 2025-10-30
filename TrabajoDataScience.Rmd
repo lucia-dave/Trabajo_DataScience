@@ -209,7 +209,6 @@ n_eliminados <- n_original - n_final
 
 cat("Número de registros originales:", n_original, "\nNúmero de registros tras limpieza:", n_final, "\nTotal de registros eliminados:", n_eliminados, "\n\n")
 ```
-
 ## 3. Visualización descriptiva de variables 
 Se llevará a cabo un análisis visual preliminar para comprender mejor el comportamiento de las variables y observar posibles relaciones o diferencias antes de proceder con los análisis estadísticos.
 
@@ -579,34 +578,10 @@ data %>%
   summarise(casos_hipercolesterolemia = n(),
             porcentaje = n()/nrow(data)*100)
 ```
-
-ANÁLISIS DE CORRELACIONES 
-
-
-
-```{r}
-
-# Calcular correlaciones
-corr_matrix <- cor(data %>% dplyr::select_if(is.numeric), use = "complete.obs")
-
-# Visualizar
-corrplot(corr_matrix, method = "color", type = "upper",
-         tl.col = "black", tl.srt = 45, addCoef.col = "black",
-         col = colorRampPalette(c("blue", "white", "red"))(200),
-         title = "Matriz de correlación", mar = c(0,0,1,0))
-
-```
-
-
-```{r}
-mediaEdad <- mean(data$age) #media de la edad de los pacientes estudiados
-mediaEdad
-```
-
 ## EJERCICIO 1: TEST DE FISHER
 En este ejercicio analizaremos la asociación entre los cuatro posibles factores de riesgo cardiovascular (tabaquismo, accidente cerebrovascular previo, hipertensión y diabetes) y el desarrollo de enfermedad coronaria en 10 años. Generando tablas de contingencia y evaluando la significancia estadística mediante el test de Fisher podremos comprobar si existe o no dicha relación.
 
-### CÓDIGO DE ANÁLISIS Y VISUALIZACIÓN
+### CÓDIGO DE ANÁLISIS CON CREACIÓN DE TABLAS DE CONTINGENCIA
 ```{r}
 #Factores de riesgo que queremos analizar
 factores <- c("is_smoking", "prevalentStroke", "prevalentHyp", "diabetes")
@@ -665,16 +640,45 @@ Las hipótesis estadísticas para este test son las siguientes:
   -**Hipótesis nula (H₀):** el factor no influye en el riesgo de enfermedad coronaria.  
   -**Hipótesis alternativa (H₁):** el factor aumenta la probabilidad de padecer enfermedad coronaria (TenYearCHD = 'YES').
   
+### CONTROL DE FALSOS POSITIVOS
+Para controlar la tasa de falsos positivos, se va a aplicar un ajuste de los valores *p* mediante el método de *False Discovery Rate (FDR)*, con <5% de falsos positivos.
+
 ```{r}
-lapply(tablas, fisher.test)
+#Función para calcular el p-value del test de Fisher para cada factor
+fisher_test_CHD <- function(data, variable){
+  
+  tabla <- table(data[[variable]], data$TenYearCHD) #Creamos la tabla de contingencia
+  
+  test <- fisher.test(tabla, alternative = "greater") #Greater para saber si aumenta el riesgo de CHD
+
+  return(test$p.value)
+}
+
+pvalues <- sapply(factores, fisher_test_CHD, data = data) #Calculamos el p-values para cada factor
+
+pvalues_ajustados <- p.adjust(pvalues, method = "fdr") #Ajustamos los p-values con el metodo fdr
+
+odds_ratios <- sapply(factores, function(var){ #Calcular Odds Ratio para cada factor
+  tabla <- table(data[[var]], data$TenYearCHD)
+  fisher.test(tabla)$estimate
+})
+
+resultados_fdr <- data.frame(
+  P_Value = round(pvalues, 5),
+  P_Value_Ajustado = round(pvalues_ajustados, 5),
+  Odds_Ratio = round(odds_ratios, 2),
+  Significativo = ifelse(pvalues_ajustados < 0.05, "Sí", "No") #<5% de falsos positivos
+)
+
+print(resultados_fdr)
 ```
 **INTERPRETACIÓN RESULTADOS:**
 Con un nivel de significancia α = 0.05:
-1. is_smoking (p-valor = 0.077): no se rechaza H₀. No hay evidencia estadística suficiente de asociación entre tabaquismo y CHD.
+1. is_smoking (p-valor = 0.0389): se rechaza H₀. Hay evidencia estadística suficiente de asociación entre tabaquismo y CHD.
 
-Odds ratio = 1.21 indica un riesgo ligeramente mayor, pero no es significativo.
+Odds ratio = 1.21 indica un riesgo de un 21% más de probabilidades de desarrollar CHD en comparación con los no fumadores.
 
-2. prevalentStroke (p-valor = 0.012): se rechaza H₀. Existe asociación significativa entre haber sufrido un stroke y desarrollar CHD.
+2. prevalentStroke (p-valor = 0.01152): se rechaza H₀. Existe asociación significativa entre haber sufrido un stroke y desarrollar CHD.
 
 Odds ratio = 3.65 indica que quienes tuvieron un stroke tienen 3.65 veces más probabilidad de desarrollar CHD.
 
@@ -682,39 +686,80 @@ Odds ratio = 3.65 indica que quienes tuvieron un stroke tienen 3.65 veces más p
 
 Odds ratio = 2.49 indica que las personas hipertensas tienen 2.49 veces más probabilidad de desarrollar CHD.
 
-4. diabetes (p-valor = 0.0001): se rechaza H₀. Existe asociación significativa entre diabetes y CHD.
+4. diabetes (p-valor = 0.00012): se rechaza H₀. Existe asociación significativa entre diabetes y CHD.
 
 Odds ratio = 2.87 indica que las personas diabéticas tienen 2.87 veces más probabilidad de desarrollar CHD.
 
-**Conclusión**: los factores prevalentStroke, prevalentHyp y diabetes son factores de riesgo estadísticamente significativos para desarrollar enfermedad coronaria en la próxima década. El tabaquismo no muestra una asociación significativa.
+**Conclusión**: los cuatro factores analizados (is_smoking, prevalentStroke, prevalentHyp y diabetes) presentan una asociación estadísticamente significativa para desarrollar enfermedad coronaria en la próxima década.
 
+Tras hacer el ajuste FDR para controlar la tasa de falsos positivos al 5%, todos los factores han mantenido su significancia estadística.
 
-### CONTROL DE FALSOS POSITIVOS
-Para controlar la tasa de falsos positivos, se va a aplicar un ajuste de los valores *p* mediante el método de *False Discovery Rate (FDR)*.
-
-```{r}
-# --- CREAR TABLA DE RESULTADOS CON P-VALUES Y ODDS RATIO ---
-resultados_df <- data.frame(
-  Factor = factores,
-  P_Value = sapply(lapply(tablas, fisher.test), function(x) x$p.value),
-  OR = sapply(lapply(tablas, fisher.test), function(x) x$estimate)
-)
-
-# --- AJUSTAR P-VALUES POR FDR ---
-resultados_df$P_Value_Ajustado <- p.adjust(resultados_df$P_Value, method = "fdr")
-
-# --- CLASIFICAR SIGNIFICATIVOS ---
-resultados_df <- resultados_df %>%
-  mutate(Significativo = ifelse(P_Value_Ajustado < 0.05, "Sí", "No"),
-         log_p = -log10(P_Value_Ajustado))
-
-# --- MOSTRAR TABLA DE RESULTADOS ---
-print(resultados_df)
-```
-Tras hacer el ajuste FDR, los factores prevalentStroke, prevalentHyp y diabetes siguen siendo estadísticamente significativos. El tabaquismo continúa sin alcanzar significancia estadística.
-
-## ANÁLISIS EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE FISHER)
+### ANÁLISIS EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE FISHER)
 
 Para complementar el contraste de hipótesis, se genera una representación visual que muestra la fuerza de asociación (*odds ratio*) y la significación estadística (*p-values*) de cada factor analizado.  
 De esta forma, se facilita la identificación de los factores de riesgo más influyentes.
 
+```{r}
+# --- Preparar datos para el volcano plot ---
+volcano_data <- data.frame(
+  Factor = factores,
+  Odds_Ratio = odds_ratios,
+  P_Value_Ajustado = pvalues_ajustados,
+  log2_OR = log2(odds_ratios),
+  neglog10_padj = -log10(pvalues_ajustados),
+  stringsAsFactors = FALSE
+)
+
+# --- Clasificar significancia ---
+volcano_data$sig <- factor("0", levels = c("0", "1"))
+volcano_data$sig[volcano_data$P_Value_Ajustado < 0.05 & volcano_data$log2_OR > 0] <- "1"
+
+# --- Etiquetas para factores significativos ---
+volcano_data$lab <- ""
+volcano_data$lab[volcano_data$sig == "1"] <- volcano_data$Factor[volcano_data$sig == "1"]
+
+# --- Crear volcano plot ---
+x_pad <- max(abs(volcano_data$log2_OR), na.rm = TRUE) + 0.3
+
+ggplot(volcano_data, aes(x = log2_OR, y = neglog10_padj, colour = sig)) +
+  geom_point(size = 4) +
+  theme_classic() +
+  scale_x_continuous(limits = c(-0.5, x_pad)) +
+  scale_color_manual(
+    values = c("0" = "#000000", "1" = "#D60C00FF"),
+    drop = FALSE
+  ) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(colour = "black", size = 1),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  ) +
+  xlab(bquote(~Log[2]~Odds~Ratio)) +
+  ylab(bquote(~-Log[10]~Adjusted~p-Value)) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_text_repel(
+    aes(label = lab),
+    box.padding = 0.5,
+    point.padding = 0.3,
+    max.overlaps = 10
+  ) +
+  ggtitle("Factores de riesgo asociados a enfermedad coronaria (CHD)")
+```
+Los 4 factores están por encima de la línea de significancia y hacia la derecha, indicando que todos aumentan significativamente el riesgo de CHD. prevalentStroke tiene el efecto más fuerte (más a la derecha), mientras que prevalentHyp es el más significativo estadísticamente (más arriba). Por el contrario, is_smoking es el que tiene menor peso estadístico y el que causa el menor efecto de padecer enfermedades coronarias frente al resto de factores.
+
+## EJERCICIO 2: ANÁLISIS DE CORRELACIONES
+```{r}
+
+# Calcular correlaciones
+corr_matrix <- cor(data %>% dplyr::select_if(is.numeric), use = "complete.obs")
+
+# Visualizar
+corrplot(corr_matrix, method = "color", type = "upper",
+         tl.col = "black", tl.srt = 45, addCoef.col = "black",
+         col = colorRampPalette(c("blue", "white", "red"))(200),
+         title = "Matriz de correlación", mar = c(0,0,1,0))
+
+```
