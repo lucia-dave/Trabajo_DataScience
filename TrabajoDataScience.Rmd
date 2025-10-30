@@ -693,6 +693,13 @@ Odds ratio = 2.87 indica que las personas diabéticas tienen 2.87 veces más pro
 Para controlar la tasa de falsos positivos, se va a aplicar un ajuste de los valores *p* mediante el método de *False Discovery Rate (FDR)*.
 
 ```{r}
+# --- CREAR TABLA DE RESULTADOS CON P-VALUES Y ODDS RATIO ---
+resultados_df <- data.frame(
+  Factor = factores,
+  P_Value = sapply(lapply(tablas, fisher.test), function(x) x$p.value),
+  OR = sapply(lapply(tablas, fisher.test), function(x) x$estimate)
+)
+
 # --- AJUSTAR P-VALUES POR FDR ---
 resultados_df$P_Value_Ajustado <- p.adjust(resultados_df$P_Value, method = "fdr")
 
@@ -704,6 +711,7 @@ resultados_df <- resultados_df %>%
 # --- MOSTRAR TABLA DE RESULTADOS ---
 print(resultados_df)
 ```
+Tras hacer el ajuste FDR, los factores prevalentStroke, prevalentHyp y diabetes siguen siendo estadísticamente significativos. El tabaquismo continúa sin alcanzar significancia estadística.
 
 ## ANÁLISIS EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE FISHER)
 
