@@ -379,15 +379,9 @@ descriptiva de variables</a>
 <ul>
 <li><a href="#c%C3%B3digo-de-an%C3%A1lisis-y-visualizaci%C3%B3n" id="toc-código-de-análisis-y-visualización">CÓDIGO DE ANÁLISIS Y
 VISUALIZACIÓN</a></li>
+<li><a href="#control-de-falsos-positivos" id="toc-control-de-falsos-positivos">CONTROL DE FALSOS
+POSITIVOS</a></li>
 </ul></li>
-</ul></li>
-<li><a href="#organizar-resultados-en-un-dataframe" id="toc-organizar-resultados-en-un-dataframe">— ORGANIZAR RESULTADOS EN
-UN dataFRAME —</a></li>
-<li><a href="#ajustar-p-values-por-fdr" id="toc-ajustar-p-values-por-fdr">— AJUSTAR P-VALUES POR FDR —</a></li>
-<li><a href="#clasificar-significativos" id="toc-clasificar-significativos">— CLASIFICAR SIGNIFICATIVOS
-—</a></li>
-<li><a href="#mostrar-tabla-de-resultados" id="toc-mostrar-tabla-de-resultados">— MOSTRAR TABLA DE RESULTADOS —</a>
-<ul>
 <li><a href="#an%C3%A1lisis-extendido-visualizaci%C3%B3n-de-asociaciones-test-de-fisher" id="toc-análisis-extendido-visualización-de-asociaciones-test-de-fisher">ANÁLISIS
 EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE FISHER)</a></li>
 </ul></li>
@@ -1158,9 +1152,9 @@ hipertensión y sufrir algun tipo de riesgo cardiovascular.</p>
 </ul>
 <p>También podemos apreciar que el hecho de sufrir diabetes es un factor
 de riesgo al presentar una mayor proporción de casos con CHD.</p>
-<p>A pesar de estas conclusiones que se obtienen a raíz de las tablas de
-contingencia, no sabemos con certeza aún si estos datos presentan
-significancia estadística. Pueden no ser fiables y llevarnos a
+<p>Sin embargo, a pesar de estas conclusiones que se obtienen a raíz de
+las tablas de contingencia, no sabemos aún con certeza si estos datos
+presentan significancia estadística. Pueden no ser fiables y llevarnos a
 estimaciones erróneas. Es importante fundamentar y razonar
 estadísticamente si los datos obtenidos son consistentes. Por ello,
 vamos a realizar un <strong>test de Fisher</strong> independiente para
@@ -1232,49 +1226,69 @@ probabilidad de padecer enfermedad coronaria (TenYearCHD = ‘YES’).</p>
 <p><strong>INTERPRETACIÓN RESULTADOS:</strong> Con un nivel de
 significancia α = 0.05: 1. is_smoking (p-valor = 0.077): no se rechaza
 H₀. No hay evidencia estadística suficiente de asociación entre
-tabaquismo y CHD. Odds ratio = 1.21 indica un riesgo ligeramente mayor,
-pero no es significativo.</p>
+tabaquismo y CHD.</p>
+<p>Odds ratio = 1.21 indica un riesgo ligeramente mayor, pero no es
+significativo.</p>
 <ol start="2" style="list-style-type: decimal">
-<li><p>prevalentStroke (p-valor = 0.012): se rechaza H₀. Existe
-asociación significativa entre haber sufrido un stroke y desarrollar
-CHD. Odds ratio = 3.65 indica que quienes tuvieron un stroke tienen 3.65
-veces más probabilidad de desarrollar CHD.</p></li>
-<li><p>prevalentHyp (p-valor &lt; 0.001): se rechaza H₀. Existe
-asociación muy significativa entre hipertensión y CHD. Odds ratio = 2.49
-indica que las personas hipertensas tienen 2.49 veces más probabilidad
-de desarrollar CHD.</p></li>
-<li><p>diabetes (p-valor = 0.0001): se rechaza H₀. Existe asociación
-significativa entre diabetes y CHD. Odds ratio = 2.87 indica que las
-personas diabéticas tienen 2.87 veces más probabilidad de desarrollar
-CHD.</p></li>
+<li>prevalentStroke (p-valor = 0.012): se rechaza H₀. Existe asociación
+significativa entre haber sufrido un stroke y desarrollar CHD.</li>
 </ol>
-<p><strong>Conclusión</strong>: Los factores prevalentStroke,
+<p>Odds ratio = 3.65 indica que quienes tuvieron un stroke tienen 3.65
+veces más probabilidad de desarrollar CHD.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>prevalentHyp (p-valor &lt; 0.001): se rechaza H₀. Existe asociación
+muy significativa entre hipertensión y CHD.</li>
+</ol>
+<p>Odds ratio = 2.49 indica que las personas hipertensas tienen 2.49
+veces más probabilidad de desarrollar CHD.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>diabetes (p-valor = 0.0001): se rechaza H₀. Existe asociación
+significativa entre diabetes y CHD.</li>
+</ol>
+<p>Odds ratio = 2.87 indica que las personas diabéticas tienen 2.87
+veces más probabilidad de desarrollar CHD.</p>
+<p><strong>Conclusión</strong>: los factores prevalentStroke,
 prevalentHyp y diabetes son factores de riesgo estadísticamente
 significativos para desarrollar enfermedad coronaria en la próxima
 década. El tabaquismo no muestra una asociación significativa.</p>
-<p>Además, para controlar la tasa de falsos positivos, se va a aplicar
-un ajuste de los valores <em>p</em> mediante el método de <em>False
-Discovery Rate (FDR)</em>.</p>
+</div>
+<div id="control-de-falsos-positivos" class="section level3">
+<h3>CONTROL DE FALSOS POSITIVOS</h3>
+<p>Para controlar la tasa de falsos positivos, se va a aplicar un ajuste
+de los valores <em>p</em> mediante el método de <em>False Discovery Rate
+(FDR)</em>.</p>
+<pre class="r"><code># --- CREAR TABLA DE RESULTADOS CON P-VALUES Y ODDS RATIO ---
+resultados_df &lt;- data.frame(
+  Factor = factores,
+  P_Value = sapply(lapply(tablas, fisher.test), function(x) x$p.value),
+  OR = sapply(lapply(tablas, fisher.test), function(x) x$estimate)
+)
+
+# --- AJUSTAR P-VALUES POR FDR ---
+resultados_df$P_Value_Ajustado &lt;- p.adjust(resultados_df$P_Value, method = &quot;fdr&quot;)
+
+# --- CLASIFICAR SIGNIFICATIVOS ---
+resultados_df &lt;- resultados_df %&gt;%
+  mutate(Significativo = ifelse(P_Value_Ajustado &lt; 0.05, &quot;Sí&quot;, &quot;No&quot;),
+         log_p = -log10(P_Value_Ajustado))
+
+# --- MOSTRAR TABLA DE RESULTADOS ---
+print(resultados_df)</code></pre>
+<pre><code>##                          Factor      P_Value       OR P_Value_Ajustado
+## is_smoking           is_smoking 7.728747e-02 1.207710     7.728747e-02
+## prevalentStroke prevalentStroke 1.151705e-02 3.649706     1.535607e-02
+## prevalentHyp       prevalentHyp 1.749339e-17 2.487953     6.997356e-17
+## diabetes               diabetes 1.266078e-04 2.873127     2.532156e-04
+##                 Significativo     log_p
+## is_smoking                 No  1.111891
+## prevalentStroke            Sí  1.813720
+## prevalentHyp               Sí 16.155066
+## diabetes                   Sí  3.596510</code></pre>
+<p>Tras hacer el ajuste FDR, los factores prevalentStroke, prevalentHyp
+y diabetes siguen siendo estadísticamente significativos. El tabaquismo
+continúa sin alcanzar significancia estadística.</p>
 </div>
 </div>
-</div>
-<div id="organizar-resultados-en-un-dataframe" class="section level1">
-<h1>— ORGANIZAR RESULTADOS EN UN dataFRAME —</h1>
-</div>
-<div id="ajustar-p-values-por-fdr" class="section level1">
-<h1>— AJUSTAR P-VALUES POR FDR —</h1>
-<p>resultados_df<span class="math inline">\(P_Value_Ajustado &lt;-
-p.adjust(resultados_df\)</span>P_Value, method = “fdr”)</p>
-</div>
-<div id="clasificar-significativos" class="section level1">
-<h1>— CLASIFICAR SIGNIFICATIVOS —</h1>
-<p>resultados_df &lt;- resultados_df %&gt;% mutate(Significativo =
-ifelse(P_Value_Ajustado &lt; 0.1, “Sí”, “No”), log_p =
--log10(P_Value_Ajustado))</p>
-</div>
-<div id="mostrar-tabla-de-resultados" class="section level1">
-<h1>— MOSTRAR TABLA DE RESULTADOS —</h1>
-<p>print(resultados_df)</p>
 <div id="análisis-extendido-visualización-de-asociaciones-test-de-fisher" class="section level2">
 <h2>ANÁLISIS EXTENDIDO: VISUALIZACIÓN DE ASOCIACIONES (TEST DE
 FISHER)</h2>
