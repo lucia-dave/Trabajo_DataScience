@@ -705,7 +705,7 @@ resultados_df$P_Value_Ajustado <- p.adjust(resultados_df$P_Value, method = "fdr"
 
 # --- CLASIFICAR SIGNIFICATIVOS ---
 resultados_df <- resultados_df %>%
-  mutate(Significativo = ifelse(P_Value_Ajustado < 0.1, "Sí", "No"),
+  mutate(Significativo = ifelse(P_Value_Ajustado < 0.05, "Sí", "No"),
          log_p = -log10(P_Value_Ajustado))
 
 # --- MOSTRAR TABLA DE RESULTADOS ---
