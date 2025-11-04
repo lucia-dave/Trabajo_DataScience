@@ -866,18 +866,28 @@ En conjunto, los resultados indican que la relación entre el colesterol y el ri
 corr_matrix <- cor(data %>% dplyr::select_if(is.numeric), use = "complete.obs")
 
 # Visualizar
-corrplot(corr_matrix, method = "color", type = "upper",
-         tl.col = "black", tl.srt = 45, addCoef.col = "black",
-         col = colorRampPalette(c("blue", "white", "red"))(200),
-         title = "Matriz de correlación", mar = c(0,0,1,0))
-
+# Correlación ordenada + heatmap más claro
+corrplot(
+  corr_matrix,
+  method = "color",
+  type = "upper",
+  order = "hclust",  # Ordena variables por grupos de correlación
+  tl.col = "black",
+  tl.cex = 0.8,      # Tamaño de texto más pequeño
+  addCoef.col = "black",
+  number.cex = 0.7,
+  col = colorRampPalette(c("#2166AC", "white", "#B2182B"))(200),
+  title = "Matriz de Correlación Ordenada",
+  mar = c(0,0,1,0)
+)
 ```
 
-De este gráfico podemos concluir: 
+El análisis de correlación muestra que la relación lineal más fuerte se observa entre la presión sistólica (sysBP) y la presión diastólica (diaBP), lo cual era esperable dado que ambas variables miden aspectos complementarios de la presión arterial. 
+Se dentifican correlaciones moderadas entre la edad, el índice de masa corporal (BMI) y los valores de presión arterial, indicando que a mayor edad y mayor BMI tienden a presentarse niveles más altos de presión arterial.
 
+El resto de las variables, incluyendo colesterol total, frecuencia cardíaca, glucosa y consumo de cigarrillos, muestran correlaciones bajas o cercanas a cero con la mayoría de las demás variables, lo que sugiere que en este conjunto de datos no existe una relación lineal marcada entre ellas.
 
-
-
+En conjunto, los resultados indican que las asociaciones más relevantes se dan en torno a factores relacionados con presión arterial, edad y composición corporal, mientras que otros factores de riesgo cardiovascular parecen no estar linealmente relacionados entre sí. Esto evidencia que algunas relaciones pueden ser independientes o no lineales, por lo que análisis complementarios podrían ser necesarios para capturar interacciones más complejas.
 
 *PCA *
 
