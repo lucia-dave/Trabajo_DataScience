@@ -560,10 +560,6 @@ data %>%
 
 
 ```{r}
-```
-
-
-```{r}
 # 5️⃣ Colesterol total (totChol): analizar casos extremos >300 mg/dL (hipercolesterolemia)
 ggplot(data, aes(y = totChol)) +
   geom_boxplot(fill = "lightyellow", color = "goldenrod") +
