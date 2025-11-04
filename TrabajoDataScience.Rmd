@@ -746,7 +746,13 @@ ggplot(volcano_data, aes(x = log2_OR, y = neglog10_padj, colour = sig)) +
 ```
 Los 4 factores están por encima de la línea de significancia y hacia la derecha, indicando que todos aumentan significativamente el riesgo de CHD. prevalentStroke tiene el efecto más fuerte (más a la derecha), mientras que prevalentHyp es el más significativo estadísticamente (más arriba). Por el contrario, is_smoking es el que tiene menor peso estadístico y el que causa el menor efecto de padecer enfermedades coronarias frente al resto de factores.
 
-## EJERCICIO 2: ANÁLISIS DE CORRELACIONES
+
+
+
+
+
+
+## EJERCICIO 3: ANÁLISIS DE CORRELACIONES Y PCA
 ```{r}
 
 # Calcular correlaciones
