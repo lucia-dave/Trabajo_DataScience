@@ -753,11 +753,111 @@ ggplot(volcano_data, aes(x = log2_OR, y = neglog10_padj, colour = sig)) +
 ```
 Los 4 factores están por encima de la línea de significancia y hacia la derecha, indicando que todos aumentan significativamente el riesgo de CHD. prevalentStroke tiene el efecto más fuerte (más a la derecha), mientras que prevalentHyp es el más significativo estadísticamente (más arriba). Por el contrario, is_smoking es el que tiene menor peso estadístico y el que causa el menor efecto de padecer enfermedades coronarias frente al resto de factores.
 
+## EJERCICIO 2: ANÁLISIS DEL COLESTEROL SEGÚN EDAD Y RIESGO DE CHD
 
+En este ejercicio se analiza si los niveles de colesterol total (`totChol`) difieren significativamente 
+en función de dos factores:
 
+1. El **grupo de edad** del individuo (jóvenes, adultos o mayores).
+2. La **presencia de riesgo coronario a 10 años (TenYearCHD)**.
 
+El objetivo es comprobar si el colesterol varía entre grupos de edad, 
+y si además las personas con CHD presentan niveles más altos, 
+así como si el efecto de la edad es diferente en función del riesgo coronario.
 
+Comenzamos clasificando la información en una tabla que permite observar cuántos individuos pertenecen a cada grupo de edad y cuántos de ellos presentan riesgo coronario.
+```{r}
+data_ej2 <- data
 
+data_ej2$grupo_edad <- NA
+data_ej2$grupo_edad[data_ej2$age < 40] <- "Jóvenes"
+data_ej2$grupo_edad[data_ej2$age >= 40 & data_ej2$age < 60] <- "Adultos"
+data_ej2$grupo_edad[data_ej2$age >= 60] <- "Mayores"
+
+data_ej2$grupo_edad <- factor(data_ej2$grupo_edad, 
+                          levels = c("Jóvenes", "Adultos", "Mayores"))
+
+# --- Comprobar distribución ---
+table(data_ej2$grupo_edad, data_ej2$TenYearCHD)
+
+```
+
+Nos interesa saber también la media, desviación estándar y número de casos de colesterol para cada combinación de edad y riesgo coronario.
+
+```{r}
+aggregate(totChol ~ grupo_edad + TenYearCHD, data = data_ej2,
+          FUN = function(x) c(Media = mean(x, na.rm = TRUE),
+                              Desv = sd(x, na.rm = TRUE),
+                              N = length(x)))
+
+```
+
+Reresentamos los datos para una mejor valoración de su comportamiento:
+
+```{r}
+ggplot(data_ej2, aes(x = TenYearCHD, y = totChol, fill = TenYearCHD)) +
+  geom_boxplot(outlier.shape = NA) +  #Ocultamos outliers
+  stat_boxplot(geom = 'errorbar') +
+  facet_wrap(~ grupo_edad) +
+  labs(title = "Colesterol total según riesgo CHD en cada grupo de edad",
+       x = "Presencia de CHD",
+       y = "Colesterol total (mg/dL)") +
+  scale_fill_manual(values = c("lightblue", "tomato"),
+                    labels = c("No", "Sí"),
+                    name = "Riesgo CHD") +
+  coord_cartesian(ylim = c(0, 400)) +  # Ajustamos el eje y
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+```
+
+El gráfico muestra cómo los niveles de colesterol total aumentan algo con la edad, siendo ligeramente más elevados en los grupos de adultos y mayores respecto a los jóvenes. Además, dentro de los grupos de jóvenes y adultos, se aprecia cómo las personas con riesgo de enfermedad coronaria presentan valores de colesterol ligeramente superiores a las que no tienen riesgo. 
+
+Estas comparaciones y conclusiones iniciales se pueden sustentar com mayor robustez mediante los análisis estadísticos.
+
+En primer lugar, aplicamos el test de Shapiro-Wilk  para comprobar si las variables con y sin enfermedad coronaria sigue una distribución normal. De esta forma sabremos si el test adecuado es ANOVA o Kruskal_Wallis.
+
+Las hipótesis son:
+
+H₀: los datos provienen de una distribución normal.
+
+H₁: los datos no provienen de una distribución normal.
+
+```{r}
+#Normalidad del colesterol según CHD
+shapiro.test(data_ej2$totChol[data_ej2$TenYearCHD == "NO"])
+shapiro.test(data_ej2$totChol[data_ej2$TenYearCHD == "YES"])
+
+```
+
+En ambos grupos los valores de p son < 0.05, por lo que se rechaza la hipótesis nula de normalidad.
+Es decir, que la distribución de colesterol total (totChol) no sigue una distribución normal en ninguno de los dos grupos.
+
+El test correcto a utilizar a continuación es el test no paramétrico de Kruskal–Wallis:
+```{r}
+#Kruskal-Wallis para Jóvenes
+kruskal.test(totChol ~ TenYearCHD, data = filter(data_ej2, grupo_edad == "Jóvenes"))
+
+#Kruskal-Wallis para Adultos
+kruskal.test(totChol ~ TenYearCHD, data = filter(data_ej2, grupo_edad == "Adultos"))
+
+#Kruskal-Wallis para Mayores
+kruskal.test(totChol ~ TenYearCHD, data = filter(data_ej2, grupo_edad == "Mayores"))
+
+```
+
+CONCLUSIONES:
+
+- En el grupo de jóvenes, no se observa una diferencia estadísticamente significativa en los niveles de colesterol entre personas con y sin CHD (p > 0.05).
+
+- En adultos, el resultado es altamente significativo (p < 0.001), indicando que las personas con CHD presentan niveles de colesterol total significativamente más altos.
+
+- En el grupo de mayores, el p-valor es muy alto (p = 0.68), por lo que no se detectan diferencias relevantes entre los dos grupos.
+
+En conjunto, los resultados indican que la relación entre el colesterol y el riesgo de enfermedad coronaria se vuelve más evidente en la edad adulta, mientras que en edades tempranas o avanzadas no se observan diferencias tan marcadas.
 
 ## EJERCICIO 3: ANÁLISIS DE CORRELACIONES Y PCA
 ```{r}
