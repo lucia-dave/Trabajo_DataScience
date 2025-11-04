@@ -836,44 +836,99 @@ Es necesario aplicar machine learning para evaluar si con modelos no lineales o 
 *MACHINE LEARNING*
 
 ```{r}
-           
 
-# ---- Preparación ----
+
+# ==============================
+# 1. LIMPIEZA Y PREPARACIÓN
+# ==============================
 
 set.seed(123)
-data$TenYearCHD <- factor(as.character(data$TenYearCHD))
-vars <- c("age","sex","cigsPerDay","BPMeds","prevalentStroke","prevalentHyp",
-          "diabetes","totChol","sysBP","diaBP","BMI","heartRate","glucose","TenYearCHD")
 
-df_ml <- data %>% select(all_of(vars))
+# Convertimos la variable objetivo a factor
+data$TenYearCHD <- factor(data$TenYearCHD)
 
-train_idx <- createDataPartition(df_ml$TenYearCHD, p = 0.7, list = FALSE)
-train <- df_ml[train_idx, ]; test <- df_ml[-train_idx, ]
+# Split estratificado (como train_test_split stratify)
+library(caret)
+trainIndex <- createDataPartition(data$TenYearCHD, p = 0.7, list = FALSE)
+train <- data[trainIndex, ]
+test  <- data[-trainIndex, ]
 
-preproc <- preProcess(train %>% select(-TenYearCHD), method = c("center","scale"))
-Xtr <- predict(preproc, train %>% select(-TenYearCHD)); ytr <- train$TenYearCHD
-Xte <- predict(preproc, test %>% select(-TenYearCHD));  yte <- test$TenYearCHD
+cat("Distribución train:\n")
+print(prop.table(table(train$TenYearCHD)))
+cat("Distribución test:\n")
+print(prop.table(table(test$TenYearCHD)))
 
-# ---- LASSO ----
-Xtr_m <- as.matrix(Xtr); Xte_m <- as.matrix(Xte); ytr_bin <- as.numeric(as.character(ytr))
-cv_lasso <- cv.glmnet(Xtr_m, ytr_bin, family = "binomial", alpha = 1, nfolds = 5, type.measure = "auc")
-prob_lasso <- predict(cv_lasso, s = cv_lasso$lambda.min, newx = Xte_m, type = "response")
-pred_lasso <- factor(ifelse(prob_lasso > 0.5, "1", "0"), levels = c("0","1"))
 
-# ---- ElasticNet (caret) ----
-ctrl <- trainControl(method = "cv", number = 5, classProbs = TRUE, summaryFunction = twoClassSummary)
-grid <- expand.grid(alpha = seq(0,1,by=0.2), lambda = 10^seq(-4, 0, length = 20))
-train_gm <- train(x = Xtr_m, y = ytr, method = "glmnet", trControl = ctrl, tuneGrid = grid, metric = "ROC")
-prob_enet <- predict(train_gm, newdata = Xte_m, type = "prob")[, "1"]
-pred_enet <- predict(train_gm, newdata = Xte_m)
+# ==============================
+# 2. SEPARAR VARIABLES X / y Y ESCALAR
+# ==============================
 
-# ---- Evaluación ----
-confusionMatrix(pred_lasso, yte, positive = "1")
-confusionMatrix(pred_enet, yte, positive = "1")
+X_train <- train[, -ncol(train)]
+X_test  <- test[, -ncol(test)]
+y_train <- train$TenYearCHD
+y_test  <- test$TenYearCHD
 
-roc_lasso <- roc(yte, as.vector(prob_lasso)); auc(roc_lasso)
-roc_enet  <- roc(yte, prob_enet); auc(roc_enet)
+# Escalado
+means <- apply(X_train, 2, mean)
+sds   <- apply(X_train, 2, sd)
 
+Xtr_scaled <- scale(X_train, center = means, scale = sds)
+Xte_scaled <- scale(X_test,  center = means, scale = sds)
+
+Xtr_m <- as.matrix(Xtr_scaled)
+Xte_m <- as.matrix(Xte_scaled)
+
+# Eliminar columnas sin varianza
+var_cols <- apply(Xtr_m, 2, var)
+Xtr_m <- Xtr_m[, var_cols > 0]
+Xte_m <- Xte_m[, var_cols > 0]
+
+# Convertir y a 0/1 numérico
+ytr_bin <- as.numeric(as.character(y_train))
+yte_bin <- as.numeric(as.character(y_test))
+
+
+# ==============================
+# 3. MODELO LASSO (cv.glmnet)
+# ==============================
+
+library(glmnet)
+
+cv_lasso <- cv.glmnet(
+  Xtr_m, ytr_bin,
+  family = "binomial",
+  alpha = 1,
+  nfolds = 5,
+  type.measure = "auc"
+)
+
+best_lambda <- cv_lasso$lambda.min
+cat("Mejor lambda:", best_lambda, "\n")
+
+
+# ==============================
+# 4. PREDICCIÓN EN TEST
+# ==============================
+
+prob_lasso <- predict(cv_lasso, s = best_lambda, newx = Xte_m, type = "response")
+pred_lasso <- ifelse(prob_lasso > 0.5, "1", "0")
+pred_lasso <- factor(pred_lasso, levels = c("0","1"))
+
+
+# ==============================
+# 5. EVALUACIÓN
+# ==============================
+
+# Matriz de confusión
+print(table(Real = y_test, Predicho = pred_lasso))
+
+# AUC y curva ROC
+library(pROC)
+roc_lasso <- roc(as.numeric(as.character(y_test)), as.vector(prob_lasso))
+auc_value <- auc(roc_lasso)
+cat("AUC:", auc_value, "\n")
+
+plot(roc_lasso, main = "Curva ROC - LASSO")
 
 
 ```
