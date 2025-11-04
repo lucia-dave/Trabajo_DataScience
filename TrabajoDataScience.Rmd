@@ -78,6 +78,11 @@ Este conjunto de variables permitirá realizar un análisis completo de los fact
 # VOLUMEN 1: Análisis exploratorio y estadístico
 ## 1. Importar librerías y datos
 ```{r libraries,warning=FALSE,message=FALSE}
+
+install.packages("caret")  
+install.packages("glmnet")   
+install.packages("dplyr") 
+
 library(ggplot2)
 library(viridis)
 library(ggrepel)
@@ -95,7 +100,9 @@ library(jsonlite)
 library(data.table)
 library(scales)
 library(corrplot)
-
+library(caret)       
+library(dplyr)    
+library(glmnet)   
 
 ```
 
@@ -765,3 +772,110 @@ corrplot(corr_matrix, method = "color", type = "upper",
          title = "Matriz de correlación", mar = c(0,0,1,0))
 
 ```
+
+De este gráfico podemos concluir: 
+
+
+
+
+
+*PCA *
+
+```{r}
+
+# Seleccionamos solo variables numéricas para aplicar PCA
+data_num <- data %>% dplyr::select_if(is.numeric)
+
+# Escalamos los datos 
+data_scaled <- scale(data_num)
+
+# Aplicamos PCA
+PCs <- prcomp(data_scaled, center = TRUE, scale. = TRUE)
+
+# Verificamos dimensiones
+dim(PCs$rotation)
+
+# Varianza explicada por cada componente
+summary(PCs) 
+
+
+```
+Las conclusiones que podemos sacar de estos resultados son las siguientes: 
+
+- La primera componente principal (PC1) explica el 25.25 % de la variabilidad total, por lo que ya recoge una parte importante de la información.
+
+- Las dos primeras componentes (PC1 + PC2) explican conjuntamente 36.62 %, lo cual permite visualizar los datos, aunque no representan la mayoría de la variabilidad.
+
+- Para alcanzar una explicación superior al 70 % de la varianza, es necesario conservar al menos las primeras 5–6 componentes.
+
+
+```{r}
+
+# Añadir PC1 y PC2 + la variable de riesgo
+data_pca <- data.frame(PC1 = PCs$x[,1],
+                       PC2 = PCs$x[,2],
+                       TenYearCHD = as.factor(data$TenYearCHD))
+
+# Gráfico PCA
+ggplot(data_pca, aes(x = PC1, y = PC2, color = TenYearCHD)) +
+  geom_point(size = 2.5, alpha = 0.7) +
+  theme_classic() +
+  labs(title = "PCA TenYearCHD",
+       x = paste0("PC1 (", round(100 * summary(PCs)$importance[2,1],2), "%)"),
+       y = paste0("PC2 (", round(100 * summary(PCs)$importance[2,2],2), "%)")) +
+  theme(legend.title = element_blank())
+
+
+```
+
+Tras aplicar PCA a las variables, podemos observar que los individuos con diagnostico positivo de TenYearCHD no se agrupan en una region diferenciada respecto a los individuos sanos. 
+Esto indica que aunque existen patrones en los datos, la variabilidad atribuible al riesgo cardiovascular no se puede explicar mediante combinaciones lineales simples de las variables originales. 
+
+Es necesario aplicar machine learning para evaluar si con modelos no lineales o multivariantes se puede mejorar la capacidad predictiva.
+
+*MACHINE LEARNING*
+
+```{r}
+           
+
+# ---- Preparación ----
+
+set.seed(123)
+data$TenYearCHD <- factor(as.character(data$TenYearCHD))
+vars <- c("age","sex","cigsPerDay","BPMeds","prevalentStroke","prevalentHyp",
+          "diabetes","totChol","sysBP","diaBP","BMI","heartRate","glucose","TenYearCHD")
+
+df_ml <- data %>% select(all_of(vars))
+
+train_idx <- createDataPartition(df_ml$TenYearCHD, p = 0.7, list = FALSE)
+train <- df_ml[train_idx, ]; test <- df_ml[-train_idx, ]
+
+preproc <- preProcess(train %>% select(-TenYearCHD), method = c("center","scale"))
+Xtr <- predict(preproc, train %>% select(-TenYearCHD)); ytr <- train$TenYearCHD
+Xte <- predict(preproc, test %>% select(-TenYearCHD));  yte <- test$TenYearCHD
+
+# ---- LASSO ----
+Xtr_m <- as.matrix(Xtr); Xte_m <- as.matrix(Xte); ytr_bin <- as.numeric(as.character(ytr))
+cv_lasso <- cv.glmnet(Xtr_m, ytr_bin, family = "binomial", alpha = 1, nfolds = 5, type.measure = "auc")
+prob_lasso <- predict(cv_lasso, s = cv_lasso$lambda.min, newx = Xte_m, type = "response")
+pred_lasso <- factor(ifelse(prob_lasso > 0.5, "1", "0"), levels = c("0","1"))
+
+# ---- ElasticNet (caret) ----
+ctrl <- trainControl(method = "cv", number = 5, classProbs = TRUE, summaryFunction = twoClassSummary)
+grid <- expand.grid(alpha = seq(0,1,by=0.2), lambda = 10^seq(-4, 0, length = 20))
+train_gm <- train(x = Xtr_m, y = ytr, method = "glmnet", trControl = ctrl, tuneGrid = grid, metric = "ROC")
+prob_enet <- predict(train_gm, newdata = Xte_m, type = "prob")[, "1"]
+pred_enet <- predict(train_gm, newdata = Xte_m)
+
+# ---- Evaluación ----
+confusionMatrix(pred_lasso, yte, positive = "1")
+confusionMatrix(pred_enet, yte, positive = "1")
+
+roc_lasso <- roc(yte, as.vector(prob_lasso)); auc(roc_lasso)
+roc_enet  <- roc(yte, prob_enet); auc(roc_enet)
+
+
+
+```
+
+
