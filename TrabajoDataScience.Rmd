@@ -79,10 +79,6 @@ Este conjunto de variables permitirá realizar un análisis completo de los fact
 ## 1. Importar librerías y datos
 ```{r libraries,warning=FALSE,message=FALSE}
 
-install.packages("caret")  
-install.packages("glmnet")   
-install.packages("dplyr") 
-
 library(ggplot2)
 library(viridis)
 library(ggrepel)
@@ -947,100 +943,85 @@ Es necesario aplicar machine learning para evaluar si con modelos no lineales o 
 
 ```{r}
 
-
-# ==============================
-# 1. LIMPIEZA Y PREPARACIÓN
-# ==============================
-
 set.seed(123)
 
-# Convertimos la variable objetivo a factor
+# 1. Convertimos variable objetivo a factor
 data$TenYearCHD <- factor(data$TenYearCHD)
 
-# Split estratificado (como train_test_split stratify)
+# 2. Nos quedamos solo con variables numéricas (excepto la variable objetivo)
+numeric_vars <- sapply(data, is.numeric)
+numeric_vars["TenYearCHD"] <- FALSE   # excluir la variable objetivo si es numérica 0/1
+data_num <- data[, numeric_vars]
+
+# 3. Volvemos a incorporar la variable objetivo
+data_num$TenYearCHD <- data$TenYearCHD
+
+# 4. Split estratificado
 library(caret)
-trainIndex <- createDataPartition(data$TenYearCHD, p = 0.7, list = FALSE)
-train <- data[trainIndex, ]
-test  <- data[-trainIndex, ]
+trainIndex <- createDataPartition(data_num$TenYearCHD, p = 0.7, list = FALSE)
+train <- data_num[trainIndex, ]
+test  <- data_num[-trainIndex, ]
 
-cat("Distribución train:\n")
-print(prop.table(table(train$TenYearCHD)))
-cat("Distribución test:\n")
-print(prop.table(table(test$TenYearCHD)))
-
-
-# ==============================
-# 2. SEPARAR VARIABLES X / y Y ESCALAR
-# ==============================
-
+# 5. Separar X e y
 X_train <- train[, -ncol(train)]
 X_test  <- test[, -ncol(test)]
 y_train <- train$TenYearCHD
 y_test  <- test$TenYearCHD
 
-# Escalado
+# 6. Escalado solo a numéricas
 means <- apply(X_train, 2, mean)
 sds   <- apply(X_train, 2, sd)
+Xtr_m <- scale(X_train, center = means, scale = sds)
+Xte_m <- scale(X_test,  center = means, scale = sds)
 
-Xtr_scaled <- scale(X_train, center = means, scale = sds)
-Xte_scaled <- scale(X_test,  center = means, scale = sds)
+# 7. Target en formato 0/1
+ytr_bin <- as.numeric(y_train) - 1
+yte_bin <- as.numeric(y_test) - 1
 
-Xtr_m <- as.matrix(Xtr_scaled)
-Xte_m <- as.matrix(Xte_scaled)
-
-# Eliminar columnas sin varianza
-var_cols <- apply(Xtr_m, 2, var)
-Xtr_m <- Xtr_m[, var_cols > 0]
-Xte_m <- Xte_m[, var_cols > 0]
-
-# Convertir y a 0/1 numérico
-ytr_bin <- as.numeric(as.character(y_train))
-yte_bin <- as.numeric(as.character(y_test))
-
-
-# ==============================
-# 3. MODELO LASSO (cv.glmnet)
-# ==============================
-
+# 8. Modelo LASSO
 library(glmnet)
-
-cv_lasso <- cv.glmnet(
-  Xtr_m, ytr_bin,
-  family = "binomial",
-  alpha = 1,
-  nfolds = 5,
-  type.measure = "auc"
-)
-
+cv_lasso <- cv.glmnet(Xtr_m, ytr_bin, family = "binomial", alpha = 1, type.measure = "auc")
 best_lambda <- cv_lasso$lambda.min
 cat("Mejor lambda:", best_lambda, "\n")
 
-
-# ==============================
-# 4. PREDICCIÓN EN TEST
-# ==============================
-
+# 9. Predicción
 prob_lasso <- predict(cv_lasso, s = best_lambda, newx = Xte_m, type = "response")
-pred_lasso <- ifelse(prob_lasso > 0.5, "1", "0")
+pred_lasso <- ifelse(prob_lasso > 0.3, "1", "0")
 pred_lasso <- factor(pred_lasso, levels = c("0","1"))
 
-
-# ==============================
-# 5. EVALUACIÓN
-# ==============================
-
-# Matriz de confusión
+# 10. Evaluación
 print(table(Real = y_test, Predicho = pred_lasso))
 
-# AUC y curva ROC
 library(pROC)
-roc_lasso <- roc(as.numeric(as.character(y_test)), as.vector(prob_lasso))
-auc_value <- auc(roc_lasso)
-cat("AUC:", auc_value, "\n")
-
-plot(roc_lasso, main = "Curva ROC - LASSO")
+roc_lasso <- roc(yte_bin, as.vector(prob_lasso))
+cat("AUC:", auc(roc_lasso), "\n")
+plot(roc_lasso, main = "Curva ROC - LASSO con variables numéricas")
 
 
 ```
+CONCLUSIONES: 
+
+Como lambda es un valor muy pequeño (0.004145598 ), podemos decir que el modelo está intentando equilibrar complejidad y generalización sin eliminar demasiadas variables.
+
+En cuanto a la matriz de confusion: 
+- Muy buena detección de sanos (NO): 733/741 (~99%) → alta especificidad.
+- Pobre detección de enfermos (YES): 7/130 (~5%) → muy baja sensibilidad o recall.
+- El modelo casi siempre predice NO, porque los casos positivos son pocos (~15%)
+
+Esto se debe a que nuestro problema está desbalanceado, ya que habla de una enfermedad poco frecuente.
+
+AUC mide la capacidad del modelo para separar correctamente entre NO y YES, y en este caso nuestro modelo tiene AUC ≈ 0.71, lo que indica un rendimiento aceptable
 
 
+En cuanto a la ROC: 
+
+- Muy pocos casos positivos (solo 7 verdaderos positivos correctamente clasificados).
+- Las probabilidades predichas pueden estar muy agrupadas cerca de 0 → hace que la curva tenga saltos bruscos o escalones.
+
+```{r}
+table(test$TenYearCHD)
+
+```
+CONCLUSIÓN FINAL MACHINE LEARNING: 
+
+El modelo basado en LASSO logra una discriminación moderada (AUC ≈ 0.71), pero presenta baja sensibilidad para detectar pacientes con riesgo de enfermedad coronaria. Esto se debe principalmente al desbalance de clases en los datos.
