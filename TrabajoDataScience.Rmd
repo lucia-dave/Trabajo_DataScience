@@ -30,28 +30,29 @@ A continuación, se realizará una **exploración estadística y visual** para c
 
 Se aplicarán también **técnicas de contraste de hipótesis** y pruebas estadísticas para identificar diferencias significativas entre grupos, por ejemplo, comparando hombres y mujeres, fumadores y no fumadores, o distintos rangos de edad. Además, se llevará a cabo un **Análisis de Componentes Principales (PCA)** para estudiar patrones globales y posibles agrupamientos dentro del conjunto de datos.
 
-El trabajo se organizará en dos volúmenes principales:
+El trabajo se organizará en las siguientes secciones:
 
-**VOLUMEN 1: Análisis Exploratorio y Estadístico**  
-1. Importar librerías y datos  
-2. Limpieza y preparación de datos  
-3. Visualización descriptiva de variables  
-4. Análisis de correlaciones  
-5. Contraste de hipótesis para identificar diferencias significativas  
-6. Análisis de Componentes Principales (PCA)  
-   - Varianza explicada  
-   - Componentes principales  
+**Análisis exploratorio y estadístico de datos**:
 
-**VOLUMEN 2: Análisis Multivariante y Combinación de Variables**  
-1. Creación de tablas combinadas y resúmenes estadísticos por grupos  
-2. Análisis de relaciones entre variables cualitativas y cuantitativas  
-3. Visualización de patrones y agrupamientos detectados  
-4. Interpretación de resultados y conclusiones estadísticas
+1. Importar librerías y datos: Carga del dataset y librerías necesarias para el análisis en R.
+
+2. Limpieza y preparación de datos: Procesamiento de valores faltantes, eliminación de duplicados y normalización de variables.
+
+3. Visualización descriptiva de variables: Exploración gráfica de las variables principales mediante histogramas, gráficos de dispersión y boxplots.
+
+**Ejercicios de análisis estadístico**:
+
+Ejercicio 1: Test de Fisher – Contraste de independencia entre variables categóricas.
+
+Ejercicio 2: Análisis del colesterol según edad y riesgo de CHD – Evaluación de la relación entre el nivel de colesterol, la edad y el riesgo cardiovascular.
+
+Ejercicio 3: Análisis de correlaciones y PCA – Estudio de la relación entre variables cuantitativas y reducción de la dimensionalidad para identificar patrones globales.
+
+**Resultados y conclusiones**: síntesis de los hallazgos obtenidos, interpretación de los resultados estadísticos y discusión sobre su relevancia en el contexto de la salud cardiovascular.
 
 El propósito de esta metodología es obtener una comprensión completa de los factores de riesgo cardiovascular, explorando cómo se relacionan las distintas variables entre sí y detectando patrones que puedan ser relevantes para la investigación epidemiológica y la salud pública.
 
-
-## DATOS
+## ANÁLISIS EXPLORATORIO Y ESTADÍSTICO DE DATOS
 
 El conjunto de datos contiene información de 3.390 personas y un total de 15 variables. Cada una de ellas representa un posible factor de riesgo cardiovascular. A continuación, se describen brevemente las principales variables incluidas:
 
@@ -75,8 +76,7 @@ El conjunto de datos contiene información de 3.390 personas y un total de 15 va
 Este conjunto de variables permitirá realizar un análisis completo de los factores que pueden influir en la salud cardiovascular, combinando información médica y hábitos de vida. El estudio se centrará en examinar las relaciones entre estas variables y en detectar patrones o asociaciones que aporten información sobre el riesgo de enfermedad cardíaca en la población analizada.
 
 
-# VOLUMEN 1: Análisis exploratorio y estadístico
-## 1. Importar librerías y datos
+### 1. Importar librerías y datos
 ```{r libraries,warning=FALSE,message=FALSE}
 
 library(ggplot2)
@@ -109,7 +109,8 @@ data <- read.csv('./data/train.csv', header = T, sep = ',', stringsAsFactors = F
 head(data) #Mostramos las seis primeras filas de datos para conocer mejor la estructura
 ```
 
-## 2. Limpieza y preparación de datos  
+### 2. Limpieza y preparación de datos  
+
 Para poder realizar cálculos con nuestros datos, comprobaremos si existe algún id duplicado y eliminaremos también los pacientes que tengan algún valor nulo o de tipo 'NA'.
 ```{r}
 data <- unique(data) #Para que no haya datos duplicados
@@ -124,10 +125,10 @@ str(data)
 ```
 Observamos que en la columna 'education', los valores son:
 
-- 1:
-- 2:
-- 3: 
-- 4:
+- 1: Basico
+- 2: Medio
+- 3: Tecnico
+- 4: Universitario
 
 Factorizamos y cambiamos el nombre de los valores de 'education' para aportarles más sentido
 ```{r}
@@ -212,7 +213,9 @@ n_eliminados <- n_original - n_final
 
 cat("Número de registros originales:", n_original, "\nNúmero de registros tras limpieza:", n_final, "\nTotal de registros eliminados:", n_eliminados, "\n\n")
 ```
-## 3. Visualización descriptiva de variables 
+
+### 3. Visualización descriptiva de variables 
+
 Se llevará a cabo un análisis visual preliminar para comprender mejor el comportamiento de las variables y observar posibles relaciones o diferencias antes de proceder con los análisis estadísticos.
 
 Comenzamos realizando varios histogramas con sus densidades de variables de carácter contínuo:
