@@ -244,22 +244,19 @@ ggplot(cardio_long, aes(x = valor, fill = variable)) +
 
 **BMI**: en la campana de Gauss se aprecia una forma aproximadamente normal centrada en 25-30, lo cual corresponde a un perso normal o sobrepeso leve.
 
-**Presión diastólica (diaBP)**: sigue una distribución bastante simétrica, centrada cerca de 80-85 mmHg. Corresponde a un valor normal. #PLUS: ANALIZAR CON BOXPLOT CASOS POR ENCIMA DE 100 (HIPERTENSION)
+**Presión diastólica (diaBP)**: sigue una distribución bastante simétrica, centrada cerca de 80-85 mmHg. Corresponde a un valor normal.
+**Glucosa**: distribución altamente asimétrica a la derecha, con sesgo positivo. La mayoría de valores se encuentra entre los 80-100 mg/dL.
 
-**Glucosa**: distribución altamente asimétrica a la derecha, con sesgo positivo. La mayoría de valores se encuentra entre los 80-100 mg/dL. #PLUS: ANALIZAR CON BOXPLOT COLA LARGA DE VALORES ALTOS >150-200 (HIPERGLUCEMIA/DIABETES)
+**Frecuencia cardíaca (heartRate)**: valores centrados en torno a los 70-80 latidos por minuto, con una ligera cola hacia la derecha. Patrón típico en adultos sanos.
 
-**Frecuencia cardíaca (heartRate)**: valores centrados en torno a los 70-80 latidos por minuto, con una ligera cola hacia la derecha. Patrón típico en adultos sanos. #PLUS: ANALIZAR CON BOXPLOT >100 TAQUICARDIA
+**Presión sistólica (sysBP)**: distribución asimétrica hacia la derecha, con la mayoría entre los 120-150 mmHg. Los valores llegan hasta aproximadamente los 250 mmHg.
 
-**Presión sistólica (sysBP)**: distribución asimétrica hacia la derecha, con la mayoría entre los 120-150 mmHg. Los valores llegan hasta aproximadamente los 250 mmHg. #PLUS: ANALIZAR CON BOXPLOT PRESION ARTERIAL ELEVADA (HIPERTENSION SISTOLICA)
-
-**Colesterol total (totChol)**: dsitribución con forma de campana, centrada en torno a los 220 mg/dL, con una cola a la derecha. Indica que muchas personas tienen un colesterol ligeramente alto, ya que el valor normal de colesterol es de <200 mg/dL. #PLUS: ANALIZAR CON BOXPLOT CASOS EXTREMOS >300 HIPERCOLESTEROLEMIA
+**Colesterol total (totChol)**: dsitribución con forma de campana, centrada en torno a los 220 mg/dL, con una cola a la derecha. Indica que muchas personas tienen un colesterol ligeramente alto, ya que el valor normal de colesterol es de <200 mg/dL.
 
 
 A continuación, realizamos varios gráficos de barras de variables de **carácter categóricas**:
 
 ```{r}
-
-
 # Crear cada gráfico por separado
 sex_barras <- ggplot(data, aes(x = factor(sex))) +
   geom_bar(fill = "steelblue") +
@@ -293,21 +290,20 @@ education_barras
 
 ```
 
-Queremos representar la cantidad de cada variable de carácter categórico: 
+Representamos ahora la cantidad de cada variable de carácter categórico: 
 
 ```{r}
 # Seleccionamos solo las variables de interés
 vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
-
-# Convertimos todas a factor antes de pivotar
 data_long <- data %>%
   mutate(across(all_of(vars), as.factor)) %>%
   select(all_of(vars)) %>%
   pivot_longer(cols = everything(), names_to = "variable", values_to = "valor") %>%
   group_by(variable, valor) %>%
-  summarise(conteo = n(), .groups = "drop")
+  summarise(conteo = n(), .groups = "drop") %>%
+  mutate(variable_valor = interaction(variable, valor, sep = ": "))
 
-# Definimos los colores
+# Definimos los colores personalizados
 colores <- c(
   "F" = "#F6BDC0",
   "M" = "#6BAED6",
@@ -321,13 +317,15 @@ colores <- c(
   "0" = "#FC9272"
 )
 
-grafico_cantidades <- ggplot(data = data_long) + 
-  geom_bar(
-    mapping = aes(x = variable, y = conteo, fill = valor),
-    position = 'dodge', stat = 'identity', color = "black", width = 0.7
-  ) +
-  scale_y_continuous(expand = expansion(mult = c(0.01, 0.05))) +
+# Gráfico
+grafico_cantidades <- ggplot(data_long, aes(x = variable, y = conteo, fill = valor)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), color = "black", width = 0.7) +
+  geom_text(aes(label = conteo),
+            position = position_dodge(width = 0.8),
+            vjust = -0.3, size = 3) +
   scale_fill_manual(values = colores, na.value = "grey80") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme_classic() +
   theme(
     plot.title = element_text(hjust = 0.5, margin = margin(0,0,10,0), size = 12, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1, margin = margin(0,0,10,0)),
@@ -339,13 +337,14 @@ grafico_cantidades <- ggplot(data = data_long) +
     panel.background = element_rect(colour = "black", size = 1),
     legend.title = element_blank()
   ) +
-  xlab("Variables") + 
+  xlab("Variable") +
   ylab("Conteo") +
   ggtitle("Conteo de Categorías por Variable Relevante")
+
 grafico_cantidades
 ```
 
-Representamos también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
+Mostramos también los porcentajes dentro de dichas variables, para poder ver las proporciones de forma más clara:
 
 ```{r}
 
@@ -401,64 +400,6 @@ grafico_proporciones
 
 ```
 
-
-Queremos representar la cantidad de cada variable: 
-
-
-```{r}
-# Seleccionamos solo las variables de interés
-vars <- c("sex", "education", "is_smoking", "diabetes", "prevalentHyp")
-data_long <- data %>%
-  mutate(across(all_of(vars), as.factor)) %>%
-  select(all_of(vars)) %>%
-  pivot_longer(cols = everything(), names_to = "variable", values_to = "valor") %>%
-  group_by(variable, valor) %>%
-  summarise(conteo = n(), .groups = "drop") %>%
-  mutate(variable_valor = interaction(variable, valor, sep = ": "))
-
-# Definimos los colores personalizados
-colores <- c(
-  "F" = "#F6BDC0",
-  "M" = "#6BAED6",
-  "Basico" = "#FED976",
-  "Medio" = "#FD8D3C",
-  "Tecnico" = "#31A354",
-  "Universitario" = "#756BB1",
-  "YES" = "#74C476",
-  "NO" = "#E34A33",
-  "1" = "#9ECAE1",
-  "0" = "#FC9272"
-)
-
-# Gráfico
-grafico_cantidades <- ggplot(data_long, aes(x = variable, y = conteo, fill = valor)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.8), color = "black", width = 0.7) +
-  geom_text(aes(label = conteo),
-            position = position_dodge(width = 0.8),
-            vjust = -0.3, size = 3) +
-  scale_fill_manual(values = colores, na.value = "grey80") +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
-  theme_classic() +
-  theme(
-    plot.title = element_text(hjust = 0.5, margin = margin(0,0,10,0), size = 12, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1, margin = margin(0,0,10,0)),
-    axis.text.y = element_text(margin = margin(0,0,0,10)),
-    axis.title.x = element_text(margin = margin(10,0,0,0)),
-    axis.title.y = element_text(margin = margin(0,10,0,0)),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_rect(colour = "black", size = 1),
-    legend.title = element_blank()
-  ) +
-  xlab("Variable") +
-  ylab("Conteo") +
-  ggtitle("Conteo de Categorías por Variable Relevante")
-
-grafico_cantidades
-```
-
-
-
 A partir de estos gráficos vamos a comprobar los outliers que interpretemos que pueden ser error de medición, sabiendo el rango de valores lógicos de cada variable.
  
  - Colesterol total: 400–500 mg/dL
@@ -484,7 +425,7 @@ data <- data %>%
 
 ```
 
-A continuación vamos a analizar la relación entre patologías cardiovasculares asociadas a una serie de variables:
+A continuación, vamos a analizar la relación entre patologías cardiovasculares asociadas a una serie de variables:
 
 1)Analizar los casos cuya presión diastólica supere los 100 mmHg, lo cual es un indicativo de hipertensión:
 
@@ -503,14 +444,14 @@ data %>%
             porcentaje = n()/nrow(data)*100)
 
 ```
+
 La mediana se encuentra cerca de 80-85 mmHg, lo cual indica que la mayoría de pacientes presentan una presión diastólica normal. No obstante, se puede apreciar como hay puntos por encima de los 100 mmHg, que son casos de presión diastólica anormalmente alta.
 
 La tabla muestra que el número total de casos de pacientes con la presión diastólica por encima de los 100 mmHg es de 230, es decir, el 7.85% del total de pacientes. 
 
+2)Presión sistólica (sysBP), analizar valores elevados (hipertensión sistólica):
 
 ```{r}
-
-# 2 Presión sistólica (sysBP): analizar valores elevados (hipertensión sistólica)
 ggplot(data, aes(y = sysBP)) +
   geom_boxplot(fill = "orange", color = "darkorange") +
   stat_boxplot(geom=  'errorbar') +
@@ -524,13 +465,14 @@ data %>%
   summarise(casos_hipertension_sistolica = n(),
             porcentaje = n()/nrow(data)*100)
 ```
+
 En este caso, la mediana se encuentra cerca de 120-130 mmHg, lo cual indica que la mayoría de pacientes presentan una presión sistólica normal. No obstante, se puede apreciar como hay puntos por encima de los 140-160 mmHg, que son casos de presión sistólica anormalmente alta.
 
 La tabla muestra que el número total de casos de pacientes con la presión sistólica por encima de los 140-160 mmHg es de 857, es decir, el 29.27% del total de pacientes. 
 
+3) Glucosa: analizar la cola larga de valores altos >150-200 mg/dL (hiperglucemia/diabetes):
 
 ```{r}
-# 2️⃣ Glucosa: analizar la cola larga de valores altos >150-200 mg/dL (hiperglucemia/diabetes)
 ggplot(data, aes(y = glucose)) +
   geom_boxplot(fill = "lightgreen", color = "darkgreen") +
   stat_boxplot(geom=  'errorbar') +
@@ -546,9 +488,8 @@ data %>%
 
 ```
 
-
+4) Frecuencia cardíaca (heartRate): analizar valores >100 bpm (taquicardia):
 ```{r}
-# 3️⃣ Frecuencia cardíaca (heartRate): analizar valores >100 bpm (taquicardia)
 ggplot(data, aes(y = heartRate)) +
   geom_boxplot(fill = "lightpink", color = "red") +
   stat_boxplot(geom=  'errorbar') +  
@@ -564,9 +505,8 @@ data %>%
 
 ```
 
-
+5) Colesterol total (totChol): analizar casos extremos >300 mg/dL (hipercolesterolemia):
 ```{r}
-# 5️⃣ Colesterol total (totChol): analizar casos extremos >300 mg/dL (hipercolesterolemia)
 ggplot(data, aes(y = totChol)) +
   geom_boxplot(fill = "lightyellow", color = "goldenrod") +
   stat_boxplot(geom=  'errorbar') +
@@ -580,6 +520,7 @@ data %>%
   summarise(casos_hipercolesterolemia = n(),
             porcentaje = n()/nrow(data)*100)
 ```
+
 ## EJERCICIO 1: TEST DE FISHER
 En este ejercicio analizaremos la asociación entre los cuatro posibles factores de riesgo cardiovascular (tabaquismo, accidente cerebrovascular previo, hipertensión y diabetes) y el desarrollo de enfermedad coronaria en 10 años. Generando tablas de contingencia y evaluando la significancia estadística mediante el test de Fisher podremos comprobar si existe o no dicha relación.
 
