@@ -534,7 +534,7 @@ En este último caso evaluado, la mediana de valores de colesterol presente en l
 
 La tabla muestra que el número total de casos de pacientes con hipercolesterolemia es de hasta 231, alcanzando un 7.94% del total de pacientes. 
 
-##EJERCICIOS DE ANÁLISIS ESTADÍSTICO:
+## EJERCICIOS DE ANÁLISIS ESTADÍSTICO:
 
 ### EJERCICIO 1: ASOCIACIÓN DE FACTORES DE RIESGO CON EL DESARROLLO DE ENFERMEDAD CORONARIA CON TEST DE FISHER
 
